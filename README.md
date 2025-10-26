@@ -119,13 +119,6 @@ python download_snapchat_memories.py
 python download_snapchat_memories.py --apply-overlays
 ```
 
-## Documentation
-
-- **[User Guide](docs/README.md)** - Complete usage instructions and features
-- **[Developer Guide](docs/CLAUDE.md)** - Project architecture and implementation details
-- **[Build Instructions](docs/BUILD-INSTRUCTIONS.md)** - How to create executables for distribution
-- **[Testing Guide](tests/TESTING.md)** - Unit tests and testing documentation
-
 ## License
 
 MIT License - see [docs/LICENSE](docs/LICENSE)
