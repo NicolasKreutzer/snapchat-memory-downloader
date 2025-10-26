@@ -481,25 +481,28 @@ The script dynamically counts and reports:
 
 ### Automated Builds with GitHub Actions
 
-The project includes a GitHub Actions workflow (`.github/workflows/release.yml`) that automatically builds and releases the Windows executable.
+The project includes a GitHub Actions workflow (`.github/workflows/release.yml`) that automatically builds and releases executables for **Windows, macOS, and Linux**.
 
 **How to create a new release:**
 
 1. Go to the repository's Actions tab on GitHub
 2. Select "Build and Release" workflow
 3. Click "Run workflow"
-4. Enter the version number (e.g., `0.1.2`)
+4. Enter the version number (e.g., `1.2.0`)
 5. Click "Run workflow"
 
 The workflow will automatically:
-- Build the Windows executable with PyInstaller
-- Create a distribution package with:
-  - `snapchat-memories-downloader.exe`
+- Build executables for **Windows**, **macOS**, and **Linux** in parallel (~5-10 minutes)
+- Create distribution packages for each platform with:
+  - Platform-specific executable
   - `README.md` (user-facing documentation)
   - `licenses/` folder (all third-party licenses)
-- Zip the distribution package
-- Create a GitHub release with the version tag (e.g., `v0.1.2`)
-- Attach the zip file to the release
+- Zip each distribution package
+- Create a GitHub release with the version tag (e.g., `v1.2.0`)
+- Attach all three platform ZIPs to the release:
+  - `snapchat-memories-downloader-windows.zip`
+  - `snapchat-memories-downloader-macos.zip`
+  - `snapchat-memories-downloader-linux.zip`
 
 **Manual Release Process:**
 
