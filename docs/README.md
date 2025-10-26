@@ -63,7 +63,7 @@ The script will automatically detect these at startup and prompt you if they're 
 
 **For embedding GPS coordinates in files:**
 - **ExifTool** - [Download ExifTool](https://exiftool.org/)
-  - **Windows**: Download from https://exiftool.org/ and extract to the script folder as `exiftool-13.39_64/`
+  - **Windows**: Download from https://exiftool.org/ and extract to `tools/exiftool/` folder
   - **Linux**: `sudo apt install libimage-exiftool-perl` or `sudo dnf install perl-Image-ExifTool`
   - **macOS**: `brew install exiftool`
   - If detected, GPS coordinates will be automatically embedded in your photos and videos
