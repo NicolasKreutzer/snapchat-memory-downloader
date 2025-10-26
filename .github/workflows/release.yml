@@ -1,0 +1,56 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.1.2)'
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        run: |
+          pip install -r tools/build/requirements-build.txt
+
+      - name: Build executable with PyInstaller
+        run: |
+          cd tools/build
+          pyinstaller snapchat-memories.spec
+
+      - name: Create distribution package
+        run: |
+          mkdir -p dist/snapchat-memories-downloader-windows/licenses
+          cp tools/build/dist/snapchat-memories-downloader.exe dist/snapchat-memories-downloader-windows/
+          cp docs/README-DISTRIBUTION.md dist/snapchat-memories-downloader-windows/README.md
+          cp -r docs/licenses/* dist/snapchat-memories-downloader-windows/licenses/
+        shell: bash
+
+      - name: Create zip file
+        run: |
+          cd dist
+          Compress-Archive -Path snapchat-memories-downloader-windows -DestinationPath snapchat-memories-downloader-windows.zip -Force
+        shell: powershell
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          draft: false
+          prerelease: false
+          files: dist/snapchat-memories-downloader-windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

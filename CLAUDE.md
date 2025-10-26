@@ -477,6 +477,65 @@ The script dynamically counts and reports:
 - Missing metadata: Use fallback naming
 - Progress saved after each successful download
 
+## Release Process
+
+### Automated Builds with GitHub Actions
+
+The project includes a GitHub Actions workflow (`.github/workflows/release.yml`) that automatically builds and releases the Windows executable.
+
+**How to create a new release:**
+
+1. Go to the repository's Actions tab on GitHub
+2. Select "Build and Release" workflow
+3. Click "Run workflow"
+4. Enter the version number (e.g., `0.1.2`)
+5. Click "Run workflow"
+
+The workflow will automatically:
+- Build the Windows executable with PyInstaller
+- Create a distribution package with:
+  - `snapchat-memories-downloader.exe`
+  - `README.md` (user-facing documentation)
+  - `licenses/` folder (all third-party licenses)
+- Zip the distribution package
+- Create a GitHub release with the version tag (e.g., `v0.1.2`)
+- Attach the zip file to the release
+
+**Manual Release Process:**
+
+If you need to build manually:
+
+1. Install build dependencies:
+   ```bash
+   pip install -r tools/build/requirements-build.txt
+   ```
+
+2. Build the executable:
+   ```bash
+   cd tools/build
+   pyinstaller snapchat-memories.spec
+   ```
+
+3. Create distribution package:
+   ```bash
+   cd ../..
+   mkdir -p dist/snapchat-memories-downloader-windows/licenses
+   cp tools/build/dist/snapchat-memories-downloader.exe dist/snapchat-memories-downloader-windows/
+   cp docs/README-DISTRIBUTION.md dist/snapchat-memories-downloader-windows/README.md
+   cp -r docs/licenses/* dist/snapchat-memories-downloader-windows/licenses/
+   ```
+
+4. Create zip file (PowerShell on Windows):
+   ```powershell
+   cd dist
+   Compress-Archive -Path snapchat-memories-downloader-windows -DestinationPath snapchat-memories-downloader-windows.zip -Force
+   ```
+
+5. Create GitHub release:
+   ```bash
+   gh release create v0.1.2 dist/snapchat-memories-downloader-windows.zip --title "v0.1.2" --notes "Release notes here"
+   ```
+
 ## Recent Updates
 
 ### v1.2.0 - Timezone Conversion
