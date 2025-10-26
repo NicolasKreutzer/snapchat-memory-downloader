@@ -63,9 +63,6 @@ class SnapchatDownloader:
         (self.output_dir / "images").mkdir(exist_ok=True)
         (self.output_dir / "videos").mkdir(exist_ok=True)
         (self.output_dir / "overlays").mkdir(exist_ok=True)
-        (self.output_dir / "composited").mkdir(exist_ok=True)
-        (self.output_dir / "composited" / "images").mkdir(exist_ok=True)
-        (self.output_dir / "composited" / "videos").mkdir(exist_ok=True)
 
     def download_all(self, delay: float = 2.0):
         """Download all memories with progress tracking.
@@ -385,6 +382,15 @@ class SnapchatDownloader:
             print("  Then run the script again to update existing files")
             print()
 
+        # Check if any overlays were downloaded
+        overlay_dir = self.output_dir / "overlays"
+        if overlay_dir.exists() and list(overlay_dir.glob("*_overlay.png")):
+            print("TIP: To apply overlays back onto images and videos:")
+            print("  python download_snapchat_memories.py --apply-overlays")
+            print("  Or for images only: python download_snapchat_memories.py --apply-overlays --images-only")
+            print("  Or for videos only: python download_snapchat_memories.py --apply-overlays --videos-only")
+            print()
+
     def verify_downloads(self) -> Dict:
         """Verify all downloads are complete.
 
@@ -403,6 +409,11 @@ class SnapchatDownloader:
             videos_only: Only process videos
             rebuild_cache: Force rebuild of overlay pairs cache
         """
+        # Create composited output directories
+        (self.output_dir / "composited").mkdir(exist_ok=True)
+        (self.output_dir / "composited" / "images").mkdir(exist_ok=True)
+        (self.output_dir / "composited" / "videos").mkdir(exist_ok=True)
+
         # Find all pairs
         pairs = find_overlay_pairs(self.output_dir, use_cache=not rebuild_cache)
 
