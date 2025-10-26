@@ -59,3 +59,5 @@ tools/exiftool/*/
 tools/exiftool/exiftool*.exe
 tools/exiftool/exiftool*.zip
 tools/exiftool/exiftool
+
+/docs/todos.md
