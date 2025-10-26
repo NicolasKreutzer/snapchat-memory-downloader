@@ -20,12 +20,32 @@ def get_exiftool_path() -> str | None:
 
     # Check different possible locations based on platform
     if platform.system() == 'Windows':
-        # Try both possible names
-        exiftool_local = exiftool_dir / 'exiftool-13.39_64' / 'exiftool.exe'
+        # Check directly in tools/exiftool/ first
+        exiftool_local = exiftool_dir / 'exiftool.exe'
         if not exiftool_local.exists():
-            exiftool_local = exiftool_dir / 'exiftool-13.39_64' / 'exiftool(-k).exe'
+            exiftool_local = exiftool_dir / 'exiftool(-k).exe'
+
+        # If not found, search in any subdirectory
+        if not exiftool_local.exists() and exiftool_dir.exists():
+            for subdir in exiftool_dir.iterdir():
+                if subdir.is_dir():
+                    exiftool_local = subdir / 'exiftool.exe'
+                    if exiftool_local.exists():
+                        break
+                    exiftool_local = subdir / 'exiftool(-k).exe'
+                    if exiftool_local.exists():
+                        break
     else:
+        # Check directly in tools/exiftool/ first
         exiftool_local = exiftool_dir / 'exiftool'
+
+        # If not found, search in any subdirectory
+        if not exiftool_local.exists() and exiftool_dir.exists():
+            for subdir in exiftool_dir.iterdir():
+                if subdir.is_dir():
+                    exiftool_local = subdir / 'exiftool'
+                    if exiftool_local.exists():
+                        break
 
     if exiftool_local.exists():
         return str(exiftool_local)
@@ -115,7 +135,7 @@ def check_dependencies():
         if not has_exiftool:
             print("\n  ExifTool:")
             print("    - Windows: Download from https://exiftool.org/")
-            print("               Extract to 'tools/exiftool/' as 'exiftool-13.39_64/'")
+            print("               Extract to 'tools/exiftool/' folder")
             print("    - Linux:   sudo apt install libimage-exiftool-perl")
             print("    - macOS:   brew install exiftool")
 

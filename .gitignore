@@ -54,8 +54,8 @@ temp_*.zip
 temp_*.download
 bad_*.dat
 
-# Third-party tools and binaries (now in tools/exiftool/ - still ignored)
-tools/exiftool/exiftool-13.39_64/
+# Third-party tools and binaries (ExifTool in any format)
+tools/exiftool/*/
 tools/exiftool/exiftool*.exe
 tools/exiftool/exiftool*.zip
 tools/exiftool/exiftool
