@@ -4,8 +4,64 @@ Command-line interface for Snapchat Memories Downloader.
 """
 
 import argparse
+import sys
 from snap_config import check_dependencies
 from downloader import SnapchatDownloader
+
+try:
+    import questionary
+    MENU_AVAILABLE = True
+except ImportError:
+    MENU_AVAILABLE = False
+
+
+def show_interactive_menu():
+    """Show interactive menu for selecting operations."""
+    if not MENU_AVAILABLE:
+        print("Interactive menu not available (questionary not installed)")
+        print("Install with: pip install questionary")
+        return None
+
+    print("\n" + "="*60)
+    print("Snapchat Memories Downloader - Interactive Menu")
+    print("="*60)
+    print("\nUse ↑/↓ arrow keys to navigate, Enter to select\n")
+
+    menu_options = [
+        "Download memories from Snapchat export",
+        "Apply overlays to images and videos",
+        "Verify downloads",
+        "Verify composited files",
+        "Convert timezone (UTC → Local)",
+        "Exit"
+    ]
+
+    choice = questionary.select(
+        "Select an operation:",
+        choices=menu_options
+    ).ask()
+
+    if choice is None or choice == "Exit":
+        return None
+
+    return menu_options.index(choice)
+
+
+def get_submenu_choice(title, options):
+    """Show a submenu for additional choices."""
+    if not MENU_AVAILABLE:
+        return 0
+
+    print()
+    choice = questionary.select(
+        title,
+        choices=options
+    ).ask()
+
+    if choice is None:
+        return 0
+
+    return options.index(choice)
 
 
 def main():
@@ -31,8 +87,50 @@ def main():
                         help='Force rebuild of overlay pairs cache')
     parser.add_argument('--convert-timezone', action='store_true',
                         help='Convert all file timestamps and filenames from UTC to local timezone')
+    parser.add_argument('--interactive', action='store_true',
+                        help='Show interactive menu')
 
     args = parser.parse_args()
+
+    # Determine if we should show interactive menu
+    # Show menu if --interactive flag OR if no action flags were provided
+    show_menu = args.interactive or not any([
+        args.verify,
+        args.apply_overlays,
+        args.verify_composites,
+        args.convert_timezone
+    ])
+
+    if show_menu and MENU_AVAILABLE:
+        menu_choice = show_interactive_menu()
+
+        if menu_choice is None:
+            print("\nExiting...")
+            return
+
+        # Map menu choice to action
+        if menu_choice == 0:  # Download
+            args.verify = False
+            args.apply_overlays = False
+            args.verify_composites = False
+            args.convert_timezone = False
+            # Download will execute at the end
+        elif menu_choice == 1:  # Apply overlays
+            submenu = get_submenu_choice(
+                "Apply overlays to:",
+                ["Both images and videos", "Images only", "Videos only"]
+            )
+            args.apply_overlays = True
+            if submenu == 1:
+                args.images_only = True
+            elif submenu == 2:
+                args.videos_only = True
+        elif menu_choice == 2:  # Verify downloads
+            args.verify = True
+        elif menu_choice == 3:  # Verify composites
+            args.verify_composites = True
+        elif menu_choice == 4:  # Convert timezone
+            args.convert_timezone = True
 
     # Check dependencies before starting
     check_dependencies()
