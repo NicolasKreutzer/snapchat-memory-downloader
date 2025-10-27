@@ -3,7 +3,11 @@ I am not a bot but the rest of this is. Created with that claude fucker.
 This assumes you've exported your data and they sent you something like my_data_blah blah folder (after extracting zip) with html in it.
 
 
+
+
 Added pre-built releases for all platforms -------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>
+I don't have a Mac so let me know if it works.
+
 
 
 Recommended you 
