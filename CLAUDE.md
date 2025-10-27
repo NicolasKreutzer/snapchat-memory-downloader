@@ -108,8 +108,51 @@ snap2/
 └── CLAUDE.md                        # This file
 ```
 
+## UI/UX Design Principles
 
+### Cross-Platform Compatibility
 
+**IMPORTANT**: This application must work on Windows, macOS, and Linux. Always prioritize cross-platform compatibility in UI design decisions.
+
+#### Terminal UI Guidelines
+
+1. **Use ASCII art instead of Unicode emojis**
+   - ✅ GOOD: ASCII art like `/\_/\` `( o.o )` `> ^ <` for cats
+   - ❌ BAD: Unicode emojis like 😺 🎨 📥 which may not render on all terminals
+   - **Reason**: Many Windows terminals (cmd.exe, older PowerShell) don't support Unicode emojis properly
+   - **Reason**: Some Linux/macOS terminal configurations may have limited Unicode support
+
+2. **Use simple ASCII symbols for menu icons**
+   - ✅ GOOD: `[>>]` `[+]` `[?]` `[*]` `[~]` `[X]`
+   - ❌ BAD: Emoji icons that may appear as `?` or blank boxes
+   - **Examples**:
+     - Download: `[>>]` (arrow suggesting forward/download action)
+     - Add/Apply: `[+]` (plus sign)
+     - Verify: `[?]` (question mark for checking)
+     - Composites: `[*]` (asterisk for special processing)
+     - Convert: `[~]` (tilde for transformation)
+     - Exit: `[X]` (close symbol)
+
+3. **Test on all platforms**
+   - Windows: cmd.exe, PowerShell, Windows Terminal
+   - macOS: Terminal.app, iTerm2
+   - Linux: gnome-terminal, konsole, xterm
+
+4. **Interactive menu considerations**
+   - Use `questionary` library for cross-platform arrow key navigation
+   - Provide clear ASCII-based visual hierarchy
+   - Use bold and colors sparingly (some terminals have limited support)
+   - Always provide keyboard instructions using ASCII: `[UP]/[DOWN]` instead of `↑/↓`
+
+### Why This Matters
+
+Users run this tool on diverse systems:
+- **Windows users**: Often use cmd.exe which has very limited Unicode support
+- **Server environments**: May use minimal terminal emulators
+- **Older systems**: May not have modern Unicode font support
+- **SSH sessions**: Character encoding issues can occur
+
+By sticking to ASCII art and simple symbols, we ensure the interface looks good and functions correctly for everyone, regardless of their terminal configuration.
 
 ## Documentation
 

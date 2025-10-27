@@ -21,19 +21,29 @@ Download and organize your Snapchat memories from the "Download My Data" export.
    ./snapchat-memories-downloader
    ```
 
-3. **Point to your HTML file:**
+   An **interactive menu** will appear - use arrow keys to navigate and Enter to select:
+   - Download memories from Snapchat export
+   - Apply overlays to images and videos
+   - Verify downloads
+   - Verify composited files
+   - Convert timezone (UTC → Local)
+   - Exit
+
+3. **Or use command-line options:**
    ```
    snapchat-memories-downloader --html "path/to/memories_history.html"
    ```
 
 ## Features
 
+- **Interactive menu** - User-friendly interface with arrow key navigation
 - Downloads all your Snapchat memories (photos and videos)
 - Preserves original timestamps
 - Organizes files into `images/` and `videos/` folders
 - Names files with dates and times (e.g., `2025-10-16_194703_Image.jpg`)
-- Resumes interrupted downloads
+- Resumes interrupted downloads automatically
 - Applies Snapchat overlays back onto your images/videos
+- Returns to menu after each operation (run multiple tasks without restarting)
 
 ## Usage Examples
 
@@ -86,6 +96,7 @@ snapchat-memories-downloader --convert-timezone
 --videos-only        Only process videos when applying overlays
 --verify-composites  Check which files have overlays applied
 --convert-timezone   Convert all timestamps from UTC to local timezone
+--interactive        Show interactive menu (default if no options provided)
 ```
 
 ## Troubleshooting
@@ -122,6 +133,8 @@ This application uses the following open-source libraries:
 - **requests** (Apache 2.0) - HTTP library
 - **Pillow** (HPND) - Image processing
 - **pywin32** (PSF, Windows only) - Windows file timestamp handling
+- **questionary** (MIT) - Interactive menu interface
+- **prompt_toolkit** (BSD 3-Clause) - Terminal UI framework
 
 See `licenses/` folder for full license texts.
 

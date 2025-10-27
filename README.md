@@ -62,6 +62,7 @@ python download_snapchat_memories.py
 This tool automatically downloads all your Snapchat memories (photos and videos) from the HTML export file, organizing them with human-readable filenames and preserving the original creation timestamps.
 
 **Key Features:**
+- 🎯 **Interactive menu** - User-friendly interface with arrow key navigation (no command-line expertise needed!)
 - 📁 Organizes files into `images/`, `videos/`, and `overlays/` folders
 - 🎨 **Overlay compositing** - Combine Snapchat overlays (stickers, text, filters) back onto your photos and videos
 - 📅 Human-readable filenames with timestamps (e.g., `2025-10-16_194703_Image_9ce001ca.jpg`)
@@ -78,6 +79,7 @@ This tool automatically downloads all your Snapchat memories (photos and videos)
 ### Required
 - **Python 3.11+** - [Download Python](https://www.python.org/downloads/)
 - **requests library** - Install with: `pip install requests`
+- **questionary** (for interactive menu) - Install with: `pip install questionary`
 
 ### Optional Dependencies
 
@@ -116,15 +118,36 @@ The script will automatically detect these at startup and prompt you if they're 
 
 ## Quick Start
 
+### Interactive Menu (Recommended)
+
+Simply run the script without any arguments to launch the interactive menu:
+
 ```bash
 # Install dependencies
-pip install requests Pillow
+pip install requests Pillow questionary
 
-# Download all memories
+# Launch interactive menu
 python download_snapchat_memories.py
+```
+
+The interactive menu will appear with arrow key navigation:
+- Use **↑/↓** arrow keys to navigate
+- Press **Enter** to select
+- Choose from: Download, Apply Overlays, Verify, Convert Timezone, and more
+
+### Command-Line Usage
+
+You can also use command-line arguments directly:
+
+```bash
+# Download all memories
+python download_snapchat_memories.py --download
 
 # Apply overlays to recreate original Snapchat look
 python download_snapchat_memories.py --apply-overlays
+
+# Verify what's been downloaded
+python download_snapchat_memories.py --verify
 ```
 
 ## License
