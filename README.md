@@ -2,13 +2,16 @@
 I am not a bot but the rest of this is. Created with that claude fucker.
 This assumes you've exported your data and they sent you something like my_data_blah blah folder (after extracting zip) with html in it.
 
+
+Added pre-built releases for all platforms -------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 Recommended you 
 - create a new folder and place this whole repo inside
   - FOR EACH snapchat EXPORT!!!
       - IDK what will happen if you replace the html with a newly exported html! it should never delete files but i don't recommend this! until further testing done.)
 - move the folder from snapchat (after extracting zip) into same folder.
 - change that folder (my_data_blah blah folder) name to "data from snapchat".
-
 
 
 download_snapchat_memories.py (or snapchat-memories-downloader.exe from releases) should be at the same level as the folder you downloaded and renamed.
@@ -29,9 +32,9 @@ claude wants coffee tho: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](h
 **Pre-built executables available** - No Python installation required!
 
 Download the latest release for your platform:
-- [**Windows**](../../releases/latest) - `snapchat-memories-downloader.exe` (~20MB)
-- [**macOS**](../../releases/latest) - Coming soon
-- [**Linux**](../../releases/latest) - Coming soon
+- [**Windows**](../../releases/latest)
+- [**macOS**](../../releases/latest) 
+- [**Linux**](../../releases/latest) 
 
 **What's bundled:** Python + core libraries (requests, Pillow, pywin32)
 **Optional downloads:** FFmpeg (video overlays) and ExifTool (GPS metadata) - see below
