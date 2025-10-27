@@ -232,14 +232,16 @@ chmod +x snapchat-memories-downloader
 - Build macOS executable on Windows/Linux
 - Build Linux executable on Windows/macOS
 
+**PyInstaller creates platform-specific binaries** - you must build on the target platform.
+
 ### You CAN:
+- ✅ **Use GitHub Actions** (included in this project) - builds all platforms automatically
 - Use virtual machines to build for other platforms
-- Use GitHub Actions to build all platforms automatically
 - Use cloud build services
 
-### Recommended: GitHub Actions
+### Recommended: Use the Included GitHub Actions Workflow
 
-Create `.github/workflows/build.yml` to automatically build all platforms on every release tag.
+This project includes `.github/workflows/release.yml` that automatically builds all platforms. See the "Automated Builds with GitHub Actions" section above for details.
 
 ## Size Optimization
 
@@ -271,16 +273,58 @@ Each build includes:
 - Third-party notices are accurate
 - README correctly attributes dependencies
 
-## Automated Builds (Future)
+## Automated Builds with GitHub Actions
 
-For automated multi-platform builds, consider:
+This project includes automated multi-platform builds using GitHub Actions.
 
-1. **GitHub Actions** - Free for public repos
-2. **Travis CI** - Multi-platform support
-3. **AppVeyor** - Windows builds
-4. **CircleCI** - macOS/Linux builds
+### Using the Automated Build Workflow
 
-Example GitHub Actions workflow available in separate documentation.
+The `.github/workflows/release.yml` workflow automatically builds executables for Windows, macOS, and Linux:
+
+1. **Go to GitHub Actions** in your repository
+2. **Select "Build and Release"** workflow
+3. **Click "Run workflow"**
+4. **Enter version number** (e.g., `1.2.0`)
+5. **Click "Run workflow"**
+
+The workflow will:
+- Build executables for **Windows**, **macOS**, and **Linux** in parallel
+- Package each with documentation and licenses
+- Create ZIP files for distribution
+- Create a GitHub release with tag `v{version}`
+- Attach all three platform ZIPs to the release
+
+**Build time:** ~5-10 minutes (all platforms build in parallel)
+
+**Requirements:** Public repository (free) or GitHub Pro/Team/Enterprise
+
+### What Gets Built
+
+Each platform build includes:
+- Platform-specific executable
+- `README.md` (user documentation)
+- `licenses/` folder (all third-party licenses)
+
+**Output files:**
+- `snapchat-memories-downloader-windows.zip` (~15-25 MB)
+- `snapchat-memories-downloader-macos.zip` (~15-20 MB)
+- `snapchat-memories-downloader-linux.zip` (~15-20 MB)
+
+### Advantages of GitHub Actions
+
+- ✅ **No Mac/Linux needed** - Build all platforms from Windows
+- ✅ **Free for public repos** - No cost for open source
+- ✅ **Parallel builds** - All platforms at once
+- ✅ **Reproducible** - Same build environment every time
+- ✅ **Automated releases** - ZIPs attached to GitHub releases automatically
+
+### Alternative CI Services
+
+For private repositories or other needs:
+
+1. **Travis CI** - Multi-platform support
+2. **AppVeyor** - Windows builds
+3. **CircleCI** - macOS/Linux builds
 
 ---
 
