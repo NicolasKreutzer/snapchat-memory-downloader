@@ -64,80 +64,8 @@ def get_submenu_choice(title, options):
     return options.index(choice)
 
 
-def main():
-    """Main entry point - parses arguments and orchestrates the download."""
-    parser = argparse.ArgumentParser(description='Download Snapchat memories from HTML export')
-    parser.add_argument('--html', default='data from snapchat/html/memories_history.html',
-                        help='Path to memories_history.html file')
-    parser.add_argument('--output', default='memories',
-                        help='Output directory for downloaded memories')
-    parser.add_argument('--delay', type=float, default=2.0,
-                        help='Delay between downloads in seconds (default: 2.0, increase if rate limited)')
-    parser.add_argument('--verify', action='store_true',
-                        help='Verify downloads without downloading')
-    parser.add_argument('--apply-overlays', action='store_true',
-                        help='Composite overlay PNGs onto base images and videos')
-    parser.add_argument('--images-only', action='store_true',
-                        help='Only composite overlays onto images (skip videos)')
-    parser.add_argument('--videos-only', action='store_true',
-                        help='Only composite overlays onto videos (skip images)')
-    parser.add_argument('--verify-composites', action='store_true',
-                        help='Verify which files have been composited')
-    parser.add_argument('--rebuild-cache', action='store_true',
-                        help='Force rebuild of overlay pairs cache')
-    parser.add_argument('--convert-timezone', action='store_true',
-                        help='Convert all file timestamps and filenames from UTC to local timezone')
-    parser.add_argument('--interactive', action='store_true',
-                        help='Show interactive menu')
-
-    args = parser.parse_args()
-
-    # Determine if we should show interactive menu
-    # Show menu if --interactive flag OR if no action flags were provided
-    show_menu = args.interactive or not any([
-        args.verify,
-        args.apply_overlays,
-        args.verify_composites,
-        args.convert_timezone
-    ])
-
-    if show_menu and MENU_AVAILABLE:
-        menu_choice = show_interactive_menu()
-
-        if menu_choice is None:
-            print("\nExiting...")
-            return
-
-        # Map menu choice to action
-        if menu_choice == 0:  # Download
-            args.verify = False
-            args.apply_overlays = False
-            args.verify_composites = False
-            args.convert_timezone = False
-            # Download will execute at the end
-        elif menu_choice == 1:  # Apply overlays
-            submenu = get_submenu_choice(
-                "Apply overlays to:",
-                ["Both images and videos", "Images only", "Videos only"]
-            )
-            args.apply_overlays = True
-            if submenu == 1:
-                args.images_only = True
-            elif submenu == 2:
-                args.videos_only = True
-        elif menu_choice == 2:  # Verify downloads
-            args.verify = True
-        elif menu_choice == 3:  # Verify composites
-            args.verify_composites = True
-        elif menu_choice == 4:  # Convert timezone
-            args.convert_timezone = True
-
-    # Check dependencies before starting
-    check_dependencies()
-
-    # Create downloader instance
-    downloader = SnapchatDownloader(args.html, args.output)
-
+def run_operation(args, downloader):
+    """Execute the selected operation based on args."""
     # Run timezone conversion
     if args.convert_timezone:
         print("Converting all files from UTC to local timezone...")
@@ -213,6 +141,99 @@ def main():
     else:
         # Download all memories
         downloader.download_all(delay=args.delay)
+
+
+def main():
+    """Main entry point - parses arguments and orchestrates the download."""
+    parser = argparse.ArgumentParser(description='Download Snapchat memories from HTML export')
+    parser.add_argument('--html', default='data from snapchat/html/memories_history.html',
+                        help='Path to memories_history.html file')
+    parser.add_argument('--output', default='memories',
+                        help='Output directory for downloaded memories')
+    parser.add_argument('--delay', type=float, default=2.0,
+                        help='Delay between downloads in seconds (default: 2.0, increase if rate limited)')
+    parser.add_argument('--verify', action='store_true',
+                        help='Verify downloads without downloading')
+    parser.add_argument('--apply-overlays', action='store_true',
+                        help='Composite overlay PNGs onto base images and videos')
+    parser.add_argument('--images-only', action='store_true',
+                        help='Only composite overlays onto images (skip videos)')
+    parser.add_argument('--videos-only', action='store_true',
+                        help='Only composite overlays onto videos (skip images)')
+    parser.add_argument('--verify-composites', action='store_true',
+                        help='Verify which files have been composited')
+    parser.add_argument('--rebuild-cache', action='store_true',
+                        help='Force rebuild of overlay pairs cache')
+    parser.add_argument('--convert-timezone', action='store_true',
+                        help='Convert all file timestamps and filenames from UTC to local timezone')
+    parser.add_argument('--interactive', action='store_true',
+                        help='Show interactive menu')
+
+    args = parser.parse_args()
+
+    # Determine if we should show interactive menu
+    # Show menu if --interactive flag OR if no action flags were provided
+    show_menu = args.interactive or not any([
+        args.verify,
+        args.apply_overlays,
+        args.verify_composites,
+        args.convert_timezone
+    ])
+
+    # Check dependencies before starting
+    check_dependencies()
+
+    # Create downloader instance (once, reused for all operations)
+    downloader = SnapchatDownloader(args.html, args.output)
+
+    # Interactive menu loop
+    if show_menu and MENU_AVAILABLE:
+        while True:
+            menu_choice = show_interactive_menu()
+
+            if menu_choice is None:
+                print("\nExiting...")
+                return
+
+            # Reset args for this iteration
+            args.verify = False
+            args.apply_overlays = False
+            args.verify_composites = False
+            args.convert_timezone = False
+            args.images_only = False
+            args.videos_only = False
+
+            # Map menu choice to action
+            if menu_choice == 0:  # Download
+                pass  # Download will execute below
+            elif menu_choice == 1:  # Apply overlays
+                submenu = get_submenu_choice(
+                    "Apply overlays to:",
+                    ["Both images and videos", "Images only", "Videos only"]
+                )
+                args.apply_overlays = True
+                if submenu == 1:
+                    args.images_only = True
+                elif submenu == 2:
+                    args.videos_only = True
+            elif menu_choice == 2:  # Verify downloads
+                args.verify = True
+            elif menu_choice == 3:  # Verify composites
+                args.verify_composites = True
+            elif menu_choice == 4:  # Convert timezone
+                args.convert_timezone = True
+
+            # Execute the operation
+            run_operation(args, downloader)
+
+            # After operation completes, loop back to menu
+            print("\n" + "="*60)
+            print("Operation completed!")
+            print("="*60)
+
+    else:
+        # Command-line mode: run once and exit
+        run_operation(args, downloader)
 
 
 if __name__ == '__main__':
