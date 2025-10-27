@@ -74,7 +74,7 @@ jobs:
       - name: Create distribution package
         run: |
           mkdir -p dist/snapchat-memories-downloader-macos/licenses
-          cp dist/snapchat-memories-downloader dist/snapchat-memories-downloader-macos/
+          cp tools/build/dist/snapchat-memories-downloader dist/snapchat-memories-downloader-macos/
           cp docs/README-DISTRIBUTION.md dist/snapchat-memories-downloader-macos/README.md
           cp -r docs/licenses/* dist/snapchat-memories-downloader-macos/licenses/
           chmod +x dist/snapchat-memories-downloader-macos/snapchat-memories-downloader
@@ -114,7 +114,7 @@ jobs:
       - name: Create distribution package
         run: |
           mkdir -p dist/snapchat-memories-downloader-linux/licenses
-          cp dist/snapchat-memories-downloader dist/snapchat-memories-downloader-linux/
+          cp tools/build/dist/snapchat-memories-downloader dist/snapchat-memories-downloader-linux/
           cp docs/README-DISTRIBUTION.md dist/snapchat-memories-downloader-linux/README.md
           cp -r docs/licenses/* dist/snapchat-memories-downloader-linux/licenses/
           chmod +x dist/snapchat-memories-downloader-linux/snapchat-memories-downloader
