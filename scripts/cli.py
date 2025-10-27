@@ -15,18 +15,19 @@ try:
 except ImportError:
     MENU_AVAILABLE = False
 
-# Custom style for the menu
+# Custom style for the menu - Pastel Pink & Blue theme
+# Colors designed to work on both black and white backgrounds
 custom_style = Style([
-    ('qmark', 'fg:#673ab7 bold'),          # Question mark
-    ('question', 'bold'),                   # Question text
-    ('answer', 'fg:#f44336 bold'),         # Selected answer
-    ('pointer', 'fg:#673ab7 bold'),        # Pointer symbol
-    ('highlighted', 'fg:#673ab7 bold'),    # Highlighted choice
-    ('selected', 'fg:#cc5454'),            # Selected choice
-    ('separator', 'fg:#cc5454'),           # Separator
-    ('instruction', ''),                    # Instruction text
+    ('qmark', 'fg:#F48FB1 bold'),          # Question mark - Pastel Pink
+    ('question', 'fg:#90CAF9 bold'),        # Question text - Pastel Blue
+    ('answer', 'fg:#F48FB1 bold'),         # Selected answer - Pastel Pink
+    ('pointer', 'fg:#F48FB1 bold'),        # Pointer symbol - Pastel Pink
+    ('highlighted', 'fg:#90CAF9 bold'),    # Highlighted choice - Pastel Blue
+    ('selected', 'fg:#F48FB1'),            # Selected choice - Pastel Pink
+    ('separator', 'fg:#90CAF9'),           # Separator - Pastel Blue
+    ('instruction', 'fg:#B39DDB'),         # Instruction text - Light Purple
     ('text', ''),                           # Plain text
-    ('disabled', 'fg:#858585 italic')      # Disabled choices
+    ('disabled', 'fg:#858585 italic')      # Disabled choices - Gray
 ])
 
 
