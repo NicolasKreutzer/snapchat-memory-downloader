@@ -38,17 +38,19 @@ def show_interactive_menu():
         return None
 
     print("\n" + "="*70)
-    print("    😺  Snapchat Memories Downloader - Interactive Menu  😺")
+    print("       /\\_/\\    Snapchat Memories Downloader    /\\_/\\")
+    print("      ( o.o )        Interactive Menu          ( o.o )")
+    print("       > ^ <                                     > ^ <")
     print("="*70)
-    print("\nUse ↑/↓ arrow keys to navigate, Enter to select\n")
+    print("\nUse [UP]/[DOWN] arrow keys to navigate, [ENTER] to select\n")
 
     menu_options = [
-        "📥 Download memories from Snapchat export",
-        "🎨 Apply overlays to images and videos",
-        "✅ Verify downloads",
-        "🔍 Verify composited files",
-        "🌍 Convert timezone (UTC → Local)",
-        "🚪 Exit"
+        "[>>] Download memories from Snapchat export",
+        "[+]  Apply overlays to images and videos",
+        "[?]  Verify downloads",
+        "[*]  Verify composited files",
+        "[~]  Convert timezone (UTC -> Local)",
+        "[X]  Exit"
     ]
 
     choice = questionary.select(
@@ -57,7 +59,7 @@ def show_interactive_menu():
         style=custom_style
     ).ask()
 
-    if choice is None or choice == "🚪 Exit":
+    if choice is None or choice == "[X]  Exit":
         return None
 
     return menu_options.index(choice)
@@ -225,8 +227,8 @@ def main():
                 pass  # Download will execute below
             elif menu_choice == 1:  # Apply overlays
                 submenu = get_submenu_choice(
-                    "🎨 Apply overlays to:",
-                    ["📁 Both images and videos", "🖼️  Images only", "🎬 Videos only"]
+                    "[+] Apply overlays to:",
+                    ["[*] Both images and videos", "[I] Images only", "[V] Videos only"]
                 )
                 args.apply_overlays = True
                 if submenu == 1:
@@ -245,7 +247,7 @@ def main():
 
             # After operation completes, loop back to menu
             print("\n" + "="*70)
-            print("    ✨ Operation completed! 😺 Returning to menu... ✨")
+            print("    *** Operation completed! /\\_/\\ Returning to menu... ***")
             print("="*70)
 
     else:
