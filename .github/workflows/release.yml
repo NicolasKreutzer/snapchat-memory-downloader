@@ -9,7 +9,7 @@ on:
         type: string
 
 jobs:
-  build-and-release:
+  build-windows:
     runs-on: windows-latest
 
     steps:
@@ -44,6 +44,115 @@ jobs:
           Compress-Archive -Path snapchat-memories-downloader-windows -DestinationPath snapchat-memories-downloader-windows.zip -Force
         shell: powershell
 
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: dist/snapchat-memories-downloader-windows.zip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        run: |
+          pip install -r tools/build/requirements-build.txt
+
+      - name: Build executable with PyInstaller
+        run: |
+          cd tools/build
+          pyinstaller snapchat-memories.spec
+
+      - name: Create distribution package
+        run: |
+          mkdir -p dist/snapchat-memories-downloader-macos/licenses
+          cp tools/build/dist/snapchat-memories-downloader dist/snapchat-memories-downloader-macos/
+          cp docs/README-DISTRIBUTION.md dist/snapchat-memories-downloader-macos/README.md
+          cp -r docs/licenses/* dist/snapchat-memories-downloader-macos/licenses/
+          chmod +x dist/snapchat-memories-downloader-macos/snapchat-memories-downloader
+
+      - name: Create zip file
+        run: |
+          cd dist
+          zip -r snapchat-memories-downloader-macos.zip snapchat-memories-downloader-macos
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: dist/snapchat-memories-downloader-macos.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        run: |
+          pip install -r tools/build/requirements-build.txt
+
+      - name: Build executable with PyInstaller
+        run: |
+          cd tools/build
+          pyinstaller snapchat-memories.spec
+
+      - name: Create distribution package
+        run: |
+          mkdir -p dist/snapchat-memories-downloader-linux/licenses
+          cp tools/build/dist/snapchat-memories-downloader dist/snapchat-memories-downloader-linux/
+          cp docs/README-DISTRIBUTION.md dist/snapchat-memories-downloader-linux/README.md
+          cp -r docs/licenses/* dist/snapchat-memories-downloader-linux/licenses/
+          chmod +x dist/snapchat-memories-downloader-linux/snapchat-memories-downloader
+
+      - name: Create zip file
+        run: |
+          cd dist
+          zip -r snapchat-memories-downloader-linux.zip snapchat-memories-downloader-linux
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: dist/snapchat-memories-downloader-linux.zip
+
+  create-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: artifacts
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+          path: artifacts
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: artifacts
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -51,6 +160,9 @@ jobs:
           name: v${{ inputs.version }}
           draft: false
           prerelease: false
-          files: dist/snapchat-memories-downloader-windows.zip
+          files: |
+            artifacts/snapchat-memories-downloader-windows.zip
+            artifacts/snapchat-memories-downloader-macos.zip
+            artifacts/snapchat-memories-downloader-linux.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
