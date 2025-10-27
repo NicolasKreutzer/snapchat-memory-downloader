@@ -10,9 +10,24 @@ from downloader import SnapchatDownloader
 
 try:
     import questionary
+    from questionary import Style
     MENU_AVAILABLE = True
 except ImportError:
     MENU_AVAILABLE = False
+
+# Custom style for the menu
+custom_style = Style([
+    ('qmark', 'fg:#673ab7 bold'),          # Question mark
+    ('question', 'bold'),                   # Question text
+    ('answer', 'fg:#f44336 bold'),         # Selected answer
+    ('pointer', 'fg:#673ab7 bold'),        # Pointer symbol
+    ('highlighted', 'fg:#673ab7 bold'),    # Highlighted choice
+    ('selected', 'fg:#cc5454'),            # Selected choice
+    ('separator', 'fg:#cc5454'),           # Separator
+    ('instruction', ''),                    # Instruction text
+    ('text', ''),                           # Plain text
+    ('disabled', 'fg:#858585 italic')      # Disabled choices
+])
 
 
 def show_interactive_menu():
@@ -22,26 +37,27 @@ def show_interactive_menu():
         print("Install with: pip install questionary")
         return None
 
-    print("\n" + "="*60)
-    print("Snapchat Memories Downloader - Interactive Menu")
-    print("="*60)
+    print("\n" + "="*70)
+    print("    😺  Snapchat Memories Downloader - Interactive Menu  😺")
+    print("="*70)
     print("\nUse ↑/↓ arrow keys to navigate, Enter to select\n")
 
     menu_options = [
-        "Download memories from Snapchat export",
-        "Apply overlays to images and videos",
-        "Verify downloads",
-        "Verify composited files",
-        "Convert timezone (UTC → Local)",
-        "Exit"
+        "📥 Download memories from Snapchat export",
+        "🎨 Apply overlays to images and videos",
+        "✅ Verify downloads",
+        "🔍 Verify composited files",
+        "🌍 Convert timezone (UTC → Local)",
+        "🚪 Exit"
     ]
 
     choice = questionary.select(
         "Select an operation:",
-        choices=menu_options
+        choices=menu_options,
+        style=custom_style
     ).ask()
 
-    if choice is None or choice == "Exit":
+    if choice is None or choice == "🚪 Exit":
         return None
 
     return menu_options.index(choice)
@@ -55,7 +71,8 @@ def get_submenu_choice(title, options):
     print()
     choice = questionary.select(
         title,
-        choices=options
+        choices=options,
+        style=custom_style
     ).ask()
 
     if choice is None:
@@ -208,8 +225,8 @@ def main():
                 pass  # Download will execute below
             elif menu_choice == 1:  # Apply overlays
                 submenu = get_submenu_choice(
-                    "Apply overlays to:",
-                    ["Both images and videos", "Images only", "Videos only"]
+                    "🎨 Apply overlays to:",
+                    ["📁 Both images and videos", "🖼️  Images only", "🎬 Videos only"]
                 )
                 args.apply_overlays = True
                 if submenu == 1:
@@ -227,9 +244,9 @@ def main():
             run_operation(args, downloader)
 
             # After operation completes, loop back to menu
-            print("\n" + "="*60)
-            print("Operation completed!")
-            print("="*60)
+            print("\n" + "="*70)
+            print("    ✨ Operation completed! 😺 Returning to menu... ✨")
+            print("="*70)
 
     else:
         # Command-line mode: run once and exit
