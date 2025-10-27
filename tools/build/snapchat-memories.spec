@@ -11,6 +11,11 @@ a = Analysis(
     ],
     hiddenimports=[
         'PIL._tkinter_finder',  # Pillow sometimes needs this
+        'questionary',          # Interactive menu library
+        'prompt_toolkit',       # Required by questionary
+        'prompt_toolkit.formatted_text',
+        'prompt_toolkit.key_binding',
+        'prompt_toolkit.styles',
     ],
     hookspath=[],
     hooksconfig={},
