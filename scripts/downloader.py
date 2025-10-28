@@ -418,7 +418,16 @@ class SnapchatDownloader:
         pairs = find_overlay_pairs(self.output_dir, use_cache=not rebuild_cache)
 
         if not pairs:
+            print("\n" + "="*60)
             print("No overlay pairs found!")
+            print("="*60)
+            print("\nThis could mean:")
+            print("  1. Your memories don't have overlays (not all Snapchat memories include overlays)")
+            print("  2. Overlays weren't downloaded - check the overlays/ directory")
+            print("  3. Cache was created before overlays were downloaded")
+            print("\nTo force a cache rebuild, run with --rebuild-cache flag")
+            print("Or delete the overlay_pairs.json file and try again")
+            print("="*60 + "\n")
             return
 
         # Filter by type
