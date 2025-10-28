@@ -50,7 +50,7 @@ def show_interactive_menu():
         "[+]  Apply overlays to images and videos",
         "[?]  Verify downloads",
         "[*]  Verify composited files",
-        "[~]  Convert timezone (UTC -> Local)",
+        "[~]  Convert timezone (UTC -> Local) Note: Experimental. Use last.",
         "[X]  Exit"
     ]
 
