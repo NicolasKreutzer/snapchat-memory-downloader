@@ -33,18 +33,22 @@ def find_overlay_pairs(output_dir: Path, pairs_cache_file: str = "overlay_pairs.
             with open(pairs_cache_file, 'r') as f:
                 cached_data = json.load(f)
 
-            # Convert string paths back to Path objects
-            pairs = []
-            for item in cached_data['pairs']:
-                pairs.append({
-                    'base_file': Path(item['base_file']),
-                    'overlay_file': Path(item['overlay_file']),
-                    'media_type': item['media_type'],
-                    'sid': item['sid']
-                })
+            # Auto-rebuild if cache is empty (likely created before overlays were downloaded)
+            if cached_data.get('count', 0) == 0:
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Cache is empty, rebuilding from filesystem...")
+            else:
+                # Convert string paths back to Path objects
+                pairs = []
+                for item in cached_data['pairs']:
+                    pairs.append({
+                        'base_file': Path(item['base_file']),
+                        'overlay_file': Path(item['overlay_file']),
+                        'media_type': item['media_type'],
+                        'sid': item['sid']
+                    })
 
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Loaded {len(pairs)} pairs from cache (created {cached_data['created']})")
-            return pairs
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Loaded {len(pairs)} pairs from cache (created {cached_data['created']})")
+                return pairs
         except Exception as e:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Cache load failed: {e}, rebuilding...")
 
@@ -55,9 +59,21 @@ def find_overlay_pairs(output_dir: Path, pairs_cache_file: str = "overlay_pairs.
     # Scan overlay directory
     overlay_dir = output_dir / "overlays"
     if not overlay_dir.exists():
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Overlays directory not found: {overlay_dir}")
         return pairs
 
-    for overlay_file in overlay_dir.glob("*_overlay.png"):
+    # Count overlay files
+    overlay_files = list(overlay_dir.glob("*_overlay.png"))
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Found {len(overlay_files)} overlay files")
+
+    if len(overlay_files) == 0:
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] No overlay files found in {overlay_dir}")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] This means either:")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   1. Your memories don't have overlays (Snapchat didn't provide any)")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   2. Overlays weren't downloaded (check download_progress.json)")
+        return pairs
+
+    for overlay_file in overlay_files:
         # Parse filename: YYYY-MM-DD_HHMMSS_Type_sidXXXXXXXX_overlay.png
         filename = overlay_file.stem  # Remove .png
 
@@ -98,6 +114,18 @@ def find_overlay_pairs(output_dir: Path, pairs_cache_file: str = "overlay_pairs.
 
     # Save to cache
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Found {len(pairs)} pairs, saving to cache...")
+
+    # Provide diagnostic info if no pairs found
+    if len(pairs) == 0:
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] WARNING: No matching base files found for any overlays!")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Checked directories:")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   - Images: {output_dir / 'images'}")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   - Videos: {output_dir / 'videos'}")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Possible causes:")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   1. Base files have different SIDs than overlay files")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   2. Base files are in a different location")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}]   3. Files were renamed manually after download")
+
     cache_data = {
         'created': datetime.now().isoformat(),
         'count': len(pairs),
