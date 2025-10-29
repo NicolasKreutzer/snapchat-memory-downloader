@@ -6,6 +6,9 @@ This assumes you've exported your data and they sent you something like my_data_
 
 
 Added pre-built releases for all platforms -------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>
+https://github.com/shoeless03/snapchat-memory-downloader/releases
+
+
 I don't have a Mac so let me know if it works.
 
 
