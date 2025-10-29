@@ -10,7 +10,6 @@ from datetime import datetime
 from typing import List, Dict, Tuple, Optional
 from metadata import copy_metadata_with_exiftool
 from error_logger import ErrorLogger
-from snap_config import get_ffmpeg_path, get_ffprobe_path
 
 
 def find_overlay_pairs(output_dir: Path, pairs_cache_file: str = "overlay_pairs.json", use_cache: bool = True) -> List[Dict]:
@@ -328,14 +327,9 @@ def get_video_dimensions(video_file: Path) -> Tuple[int, int]:
         (width, height) tuple accounting for rotation
     """
     try:
-        # Get ffprobe path (handles macOS Homebrew locations)
-        ffprobe_path = get_ffprobe_path()
-        if not ffprobe_path:
-            return _get_simple_dimensions(video_file)
-
         # Get video stream info including rotation
         cmd = [
-            ffprobe_path,
+            'ffprobe',
             '-v', 'error',
             '-select_streams', 'v:0',
             '-show_entries', 'stream=width,height:stream_side_data=rotation',
@@ -383,13 +377,8 @@ def _get_simple_dimensions(video_file: Path) -> Tuple[int, int]:
         (width, height) tuple
     """
     try:
-        # Get ffprobe path (handles macOS Homebrew locations)
-        ffprobe_path = get_ffprobe_path()
-        if not ffprobe_path:
-            return 1920, 1080  # Default fallback if ffprobe not found
-
         cmd = [
-            ffprobe_path,
+            'ffprobe',
             '-v', 'error',
             '-select_streams', 'v:0',
             '-show_entries', 'stream=width,height',
@@ -454,22 +443,6 @@ def composite_video(base_file: Path, overlay_file: Path, output_dir: Path, has_e
                 )
             return False, error_msg
 
-        # Get ffmpeg path (handles macOS Homebrew locations)
-        ffmpeg_path = get_ffmpeg_path()
-        if not ffmpeg_path:
-            error_msg = "FFmpeg not found in PATH or common locations"
-            if error_logger:
-                sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
-                error_logger.log_composite_error(
-                    sid=sid,
-                    media_type='video',
-                    base_file=str(base_file),
-                    overlay_file=str(overlay_file),
-                    error_message=error_msg,
-                    additional_context={'platform': os.name}
-                )
-            return False, error_msg
-
         # Create output filename
         output_filename = base_file.stem + "_composited" + base_file.suffix
         output_path = output_dir / "composited" / "videos" / output_filename
@@ -482,7 +455,7 @@ def composite_video(base_file: Path, overlay_file: Path, output_dir: Path, has_e
         filter_complex = f"[1:v]scale={video_width}:{video_height}[ovr];[0:v][ovr]overlay=0:0:format=auto"
 
         cmd = [
-            ffmpeg_path,
+            'ffmpeg',
             '-i', str(base_file),           # Input video
             '-i', str(overlay_file),        # Input overlay
             '-filter_complex', filter_complex,  # Scale and overlay
