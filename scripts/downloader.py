@@ -568,17 +568,35 @@ class SnapchatDownloader:
             print("Install FFmpeg: https://ffmpeg.org/download.html")
             return
 
-        print(f"\nCompositing {len(pairs)} videos...")
+        # Filter out already composited
+        pending_pairs = [
+            p for p in pairs
+            if not self.progress_tracker.is_composited(p['sid'], 'video')
+        ]
+        already_done = len(pairs) - len(pending_pairs)
+
+        if already_done > 0:
+            print(f"\nSkipping {already_done} already composited videos")
+
+        if not pending_pairs:
+            print(f"\nAll {len(pairs)} videos already composited!")
+            return
+
+        start_time = time.time()
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Compositing {len(pending_pairs)} videos...")
+
+        if self.has_exiftool:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying enabled (ExifTool detected)")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying disabled (ExifTool not found)")
+
         success_count = 0
+        failed_count = 0
 
-        for i, pair in enumerate(pairs, 1):
+        for i, pair in enumerate(pending_pairs, 1):
             sid = pair['sid']
-            if self.progress_tracker.is_composited(sid, 'video'):
-                print(f"[{i}/{len(pairs)}] Skipping {pair['base_file'].name} (already composited)")
-                success_count += 1
-                continue
+            filename = pair['base_file'].name
 
-            print(f"[{i}/{len(pairs)}] Compositing {pair['base_file'].name}...", end=" ")
             success, message = composite_video(
                 pair['base_file'],
                 pair['overlay_file'],
@@ -586,7 +604,6 @@ class SnapchatDownloader:
                 has_exiftool=self.has_exiftool,
                 error_logger=self.error_logger
             )
-            print(message)
 
             if success:
                 self.progress_tracker.mark_composited(
@@ -595,6 +612,7 @@ class SnapchatDownloader:
                     str(pair['overlay_file'])
                 )
                 success_count += 1
+                status = "OK"
             else:
                 self.progress_tracker.record_composite_failure(
                     sid, 'video',
@@ -602,11 +620,29 @@ class SnapchatDownloader:
                     str(pair['overlay_file']),
                     message
                 )
+                failed_count += 1
+                status = "FAIL"
 
-            self.progress_tracker.save_progress()
+            # Progress stats
+            percent = (i / len(pending_pairs)) * 100
+            elapsed = time.time() - start_time
+            rate = i / elapsed if elapsed > 0 else 0
+            eta = (len(pending_pairs) - i) / rate if rate > 0 else 0
 
-        failed_count = len(pairs) - success_count
-        print(f"\nVideos: {success_count} composited, {failed_count} failed")
+            timestamp = datetime.now().strftime('%H:%M:%S')
+            print(f"[{timestamp}] [{i}/{len(pending_pairs)} {percent:.1f}%] {status} {filename[:40]} | "
+                  f"{rate:.2f} vid/s | ETA: {eta:.0f}s", flush=True)
+
+            # Save progress periodically
+            if i % 5 == 0:  # Save less frequently for videos (they're slower)
+                self.progress_tracker.save_progress()
+
+        # Final save
+        self.progress_tracker.save_progress()
+
+        total_time = time.time() - start_time
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Completed in {total_time:.1f}s ({total_time/len(pending_pairs):.2f}s per video)")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Videos: {success_count} composited, {failed_count} failed, {already_done} skipped")
 
     def verify_composites(self) -> Dict:
         """Verify which files have been composited.
