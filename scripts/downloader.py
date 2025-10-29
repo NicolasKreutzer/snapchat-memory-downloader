@@ -16,6 +16,7 @@ from snap_parser import parse_html_file
 from progress import ProgressTracker
 from metadata import set_file_timestamps, add_gps_metadata, update_existing_file_metadata
 from compositor import find_overlay_pairs, composite_image, composite_video
+from error_logger import ErrorLogger
 from timezone_converter import (
     utc_to_local,
     generate_local_filename,
@@ -45,6 +46,7 @@ class SnapchatDownloader:
         self.html_file = html_file
         self.output_dir = Path(output_dir)
         self.progress_tracker = ProgressTracker()
+        self.error_logger = ErrorLogger()
         self.session = requests.Session()
 
         # Check for optional dependencies
@@ -159,8 +161,15 @@ class SnapchatDownloader:
                 raise
 
         # If all retries failed
-        self.progress_tracker.record_failure(sid, memory, "Max retries exceeded")
-        return False, "Error: Max retries exceeded"
+        error_msg = "Max retries exceeded"
+        self.progress_tracker.record_failure(sid, memory, error_msg)
+        self.error_logger.log_download_error(
+            sid=sid,
+            url=memory['download_url'],
+            error_message=error_msg,
+            additional_context={'retry_attempts': max_retries}
+        )
+        return False, f"Error: {error_msg}"
 
     def _attempt_download(self, memory: Dict, sid: str) -> Tuple[bool, str]:
         """Single download attempt.
@@ -213,13 +222,24 @@ class SnapchatDownloader:
             return True, "Downloaded successfully"
 
         except Exception as e:
-            self.progress_tracker.record_failure(sid, memory, str(e), e)
+            error_msg = str(e)
+            self.progress_tracker.record_failure(sid, memory, error_msg, e)
+            self.error_logger.log_download_error(
+                sid=sid,
+                url=memory['download_url'],
+                error_message=error_msg,
+                exception=e,
+                additional_context={
+                    'media_type': memory.get('media_type', 'unknown'),
+                    'date': memory.get('date', 'unknown')
+                }
+            )
             # Clean up temp files
             for temp_name in [f"temp_{sid}.zip", f"temp_{sid}.download"]:
                 temp_path = self.output_dir / temp_name
                 if temp_path.exists():
                     temp_path.unlink()
-            return False, f"Error: {str(e)}"
+            return False, f"Error: {error_msg}"
 
     def _detect_media_type(self, file_path: Path, content_type: str) -> str:
         """Detect if file is a video or image.
@@ -494,7 +514,8 @@ class SnapchatDownloader:
                 pair['base_file'],
                 pair['overlay_file'],
                 self.output_dir,
-                has_exiftool=self.has_exiftool
+                has_exiftool=self.has_exiftool,
+                error_logger=self.error_logger
             )
 
             if success:
@@ -562,7 +583,8 @@ class SnapchatDownloader:
                 pair['base_file'],
                 pair['overlay_file'],
                 self.output_dir,
-                has_exiftool=self.has_exiftool
+                has_exiftool=self.has_exiftool,
+                error_logger=self.error_logger
             )
             print(message)
 

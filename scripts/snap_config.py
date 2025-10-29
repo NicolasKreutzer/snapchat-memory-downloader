@@ -95,9 +95,81 @@ def check_pillow() -> tuple[bool, bool]:
     return has_pillow, has_pillow_simd
 
 
+def get_ffmpeg_path() -> str | None:
+    """Get the path to FFmpeg if available.
+
+    Returns:
+        Path to ffmpeg executable, or 'ffmpeg' if in PATH, or None if not found
+    """
+    # Check PATH first
+    if shutil.which('ffmpeg') is not None:
+        return 'ffmpeg'
+
+    # Check common macOS Homebrew paths
+    if platform.system() == 'Darwin':  # macOS
+        homebrew_paths = [
+            '/opt/homebrew/bin/ffmpeg',  # Apple Silicon (M1/M2)
+            '/usr/local/bin/ffmpeg',     # Intel Mac
+        ]
+        for path in homebrew_paths:
+            if Path(path).exists():
+                return path
+
+    # Check common Linux paths
+    elif platform.system() == 'Linux':
+        linux_paths = [
+            '/usr/bin/ffmpeg',
+            '/usr/local/bin/ffmpeg',
+        ]
+        for path in linux_paths:
+            if Path(path).exists():
+                return path
+
+    return None
+
+
+def get_ffprobe_path() -> str | None:
+    """Get the path to FFprobe if available.
+
+    Returns:
+        Path to ffprobe executable, or 'ffprobe' if in PATH, or None if not found
+    """
+    # Check PATH first
+    if shutil.which('ffprobe') is not None:
+        return 'ffprobe'
+
+    # Check common macOS Homebrew paths
+    if platform.system() == 'Darwin':  # macOS
+        homebrew_paths = [
+            '/opt/homebrew/bin/ffprobe',  # Apple Silicon (M1/M2)
+            '/usr/local/bin/ffprobe',     # Intel Mac
+        ]
+        for path in homebrew_paths:
+            if Path(path).exists():
+                return path
+
+    # Check common Linux paths
+    elif platform.system() == 'Linux':
+        linux_paths = [
+            '/usr/bin/ffprobe',
+            '/usr/local/bin/ffprobe',
+        ]
+        for path in linux_paths:
+            if Path(path).exists():
+                return path
+
+    return None
+
+
 def check_ffmpeg() -> bool:
-    """Check if FFmpeg is available."""
-    return shutil.which('ffmpeg') is not None
+    """Check if FFmpeg is available.
+
+    Checks:
+    1. System PATH
+    2. Common macOS Homebrew locations
+    3. Common Linux locations
+    """
+    return get_ffmpeg_path() is not None
 
 
 def check_dependencies():
