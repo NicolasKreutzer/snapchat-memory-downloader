@@ -1,0 +1,30 @@
+# CODEOWNERS file for snapchat-memory-downloader
+#
+# This file defines who owns which parts of the codebase.
+# When a pull request modifies files, the owners are automatically
+# requested for review.
+#
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything (unless overridden below)
+*                                   @shoeless03
+
+# Core Python scripts
+scripts/                            @shoeless03
+download_snapchat_memories.py       @shoeless03
+
+# Documentation
+docs/                               @shoeless03
+*.md                                @shoeless03
+
+# Build and release infrastructure
+tools/build/                        @shoeless03
+.github/workflows/                  @shoeless03
+
+# Tests
+tests/                              @shoeless03
+
+# Configuration files
+*.json                              @shoeless03
+*.yaml                              @shoeless03
+*.yml                               @shoeless03

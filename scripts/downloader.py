@@ -16,6 +16,7 @@ from snap_parser import parse_html_file
 from progress import ProgressTracker
 from metadata import set_file_timestamps, add_gps_metadata, update_existing_file_metadata
 from compositor import find_overlay_pairs, composite_image, composite_video
+from error_logger import ErrorLogger
 from timezone_converter import (
     utc_to_local,
     generate_local_filename,
@@ -45,6 +46,7 @@ class SnapchatDownloader:
         self.html_file = html_file
         self.output_dir = Path(output_dir)
         self.progress_tracker = ProgressTracker()
+        self.error_logger = ErrorLogger()
         self.session = requests.Session()
 
         # Check for optional dependencies
@@ -159,8 +161,15 @@ class SnapchatDownloader:
                 raise
 
         # If all retries failed
-        self.progress_tracker.record_failure(sid, memory, "Max retries exceeded")
-        return False, "Error: Max retries exceeded"
+        error_msg = "Max retries exceeded"
+        self.progress_tracker.record_failure(sid, memory, error_msg)
+        self.error_logger.log_download_error(
+            sid=sid,
+            url=memory['download_url'],
+            error_message=error_msg,
+            additional_context={'retry_attempts': max_retries}
+        )
+        return False, f"Error: {error_msg}"
 
     def _attempt_download(self, memory: Dict, sid: str) -> Tuple[bool, str]:
         """Single download attempt.
@@ -213,13 +222,24 @@ class SnapchatDownloader:
             return True, "Downloaded successfully"
 
         except Exception as e:
-            self.progress_tracker.record_failure(sid, memory, str(e), e)
+            error_msg = str(e)
+            self.progress_tracker.record_failure(sid, memory, error_msg, e)
+            self.error_logger.log_download_error(
+                sid=sid,
+                url=memory['download_url'],
+                error_message=error_msg,
+                exception=e,
+                additional_context={
+                    'media_type': memory.get('media_type', 'unknown'),
+                    'date': memory.get('date', 'unknown')
+                }
+            )
             # Clean up temp files
             for temp_name in [f"temp_{sid}.zip", f"temp_{sid}.download"]:
                 temp_path = self.output_dir / temp_name
                 if temp_path.exists():
                     temp_path.unlink()
-            return False, f"Error: {str(e)}"
+            return False, f"Error: {error_msg}"
 
     def _detect_media_type(self, file_path: Path, content_type: str) -> str:
         """Detect if file is a video or image.
@@ -494,7 +514,8 @@ class SnapchatDownloader:
                 pair['base_file'],
                 pair['overlay_file'],
                 self.output_dir,
-                has_exiftool=self.has_exiftool
+                has_exiftool=self.has_exiftool,
+                error_logger=self.error_logger
             )
 
             if success:
@@ -547,24 +568,42 @@ class SnapchatDownloader:
             print("Install FFmpeg: https://ffmpeg.org/download.html")
             return
 
-        print(f"\nCompositing {len(pairs)} videos...")
+        # Filter out already composited
+        pending_pairs = [
+            p for p in pairs
+            if not self.progress_tracker.is_composited(p['sid'], 'video')
+        ]
+        already_done = len(pairs) - len(pending_pairs)
+
+        if already_done > 0:
+            print(f"\nSkipping {already_done} already composited videos")
+
+        if not pending_pairs:
+            print(f"\nAll {len(pairs)} videos already composited!")
+            return
+
+        start_time = time.time()
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Compositing {len(pending_pairs)} videos...")
+
+        if self.has_exiftool:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying enabled (ExifTool detected)")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying disabled (ExifTool not found)")
+
         success_count = 0
+        failed_count = 0
 
-        for i, pair in enumerate(pairs, 1):
+        for i, pair in enumerate(pending_pairs, 1):
             sid = pair['sid']
-            if self.progress_tracker.is_composited(sid, 'video'):
-                print(f"[{i}/{len(pairs)}] Skipping {pair['base_file'].name} (already composited)")
-                success_count += 1
-                continue
+            filename = pair['base_file'].name
 
-            print(f"[{i}/{len(pairs)}] Compositing {pair['base_file'].name}...", end=" ")
             success, message = composite_video(
                 pair['base_file'],
                 pair['overlay_file'],
                 self.output_dir,
-                has_exiftool=self.has_exiftool
+                has_exiftool=self.has_exiftool,
+                error_logger=self.error_logger
             )
-            print(message)
 
             if success:
                 self.progress_tracker.mark_composited(
@@ -573,6 +612,7 @@ class SnapchatDownloader:
                     str(pair['overlay_file'])
                 )
                 success_count += 1
+                status = "OK"
             else:
                 self.progress_tracker.record_composite_failure(
                     sid, 'video',
@@ -580,11 +620,29 @@ class SnapchatDownloader:
                     str(pair['overlay_file']),
                     message
                 )
+                failed_count += 1
+                status = "FAIL"
 
-            self.progress_tracker.save_progress()
+            # Progress stats
+            percent = (i / len(pending_pairs)) * 100
+            elapsed = time.time() - start_time
+            rate = i / elapsed if elapsed > 0 else 0
+            eta = (len(pending_pairs) - i) / rate if rate > 0 else 0
 
-        failed_count = len(pairs) - success_count
-        print(f"\nVideos: {success_count} composited, {failed_count} failed")
+            timestamp = datetime.now().strftime('%H:%M:%S')
+            print(f"[{timestamp}] [{i}/{len(pending_pairs)} {percent:.1f}%] {status} {filename[:40]} | "
+                  f"{rate:.2f} vid/s | ETA: {eta:.0f}s", flush=True)
+
+            # Save progress periodically
+            if i % 5 == 0:  # Save less frequently for videos (they're slower)
+                self.progress_tracker.save_progress()
+
+        # Final save
+        self.progress_tracker.save_progress()
+
+        total_time = time.time() - start_time
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Completed in {total_time:.1f}s ({total_time/len(pending_pairs):.2f}s per video)")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Videos: {success_count} composited, {failed_count} failed, {already_done} skipped")
 
     def verify_composites(self) -> Dict:
         """Verify which files have been composited.
