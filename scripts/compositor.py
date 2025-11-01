@@ -12,6 +12,18 @@ from metadata import copy_metadata_with_exiftool
 from error_logger import ErrorLogger
 
 
+def extract_sid_from_filename(file_path: Path) -> str:
+    """Extract session ID from filename.
+
+    Args:
+        file_path: Path object with filename format: YYYY-MM-DD_HHMMSS_Type_sidXXXXXXXX.ext
+
+    Returns:
+        Session ID (last underscore-separated part before extension) or 'unknown'
+    """
+    return file_path.stem.split('_')[-1] if '_' in file_path.stem else 'unknown'
+
+
 def find_overlay_pairs(output_dir: Path, pairs_cache_file: str = "overlay_pairs.json", use_cache: bool = True) -> List[Dict]:
     """Find all base media files with matching overlay files.
 
@@ -221,29 +233,12 @@ def composite_image(base_file: Path, overlay_file: Path, output_dir: Path, has_e
     try:
         from PIL import Image
 
-        # Validate overlay file before opening
-        overlay_size = overlay_file.stat().st_size
-        if overlay_size == 0:
-            error_msg = "Overlay file is empty (0 bytes - corrupt download from Snapchat)"
-            if error_logger:
-                # Extract SID from filename
-                sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
-                error_logger.log_composite_error(
-                    sid=sid,
-                    media_type='image',
-                    base_file=str(base_file),
-                    overlay_file=str(overlay_file),
-                    error_message=error_msg,
-                    additional_context={'overlay_file_size': 0}
-                )
-            return False, error_msg
-
-        # Validate base file
+        # Validate base file (overlay validation already done in find_overlay_pairs())
         base_size = base_file.stat().st_size
         if base_size == 0:
             error_msg = "Base image file is empty (0 bytes)"
             if error_logger:
-                sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
+                sid = extract_sid_from_filename(base_file)
                 error_logger.log_composite_error(
                     sid=sid,
                     media_type='image',
@@ -301,7 +296,7 @@ def composite_image(base_file: Path, overlay_file: Path, output_dir: Path, has_e
     except Exception as e:
         error_msg = f"Error: {str(e)}"
         if error_logger:
-            sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
+            sid = extract_sid_from_filename(base_file)
             error_logger.log_composite_error(
                 sid=sid,
                 media_type='image',
@@ -411,28 +406,12 @@ def composite_video(base_file: Path, overlay_file: Path, output_dir: Path, has_e
         (success, message)
     """
     try:
-        # Validate overlay file before processing
-        overlay_size = overlay_file.stat().st_size
-        if overlay_size == 0:
-            error_msg = "Overlay file is empty (0 bytes - corrupt download from Snapchat)"
-            if error_logger:
-                sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
-                error_logger.log_composite_error(
-                    sid=sid,
-                    media_type='video',
-                    base_file=str(base_file),
-                    overlay_file=str(overlay_file),
-                    error_message=error_msg,
-                    additional_context={'overlay_file_size': 0}
-                )
-            return False, error_msg
-
-        # Validate base file
+        # Validate base file (overlay validation already done in find_overlay_pairs())
         base_size = base_file.stat().st_size
         if base_size == 0:
             error_msg = "Base video file is empty (0 bytes)"
             if error_logger:
-                sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
+                sid = extract_sid_from_filename(base_file)
                 error_logger.log_composite_error(
                     sid=sid,
                     media_type='video',
@@ -475,7 +454,7 @@ def composite_video(base_file: Path, overlay_file: Path, output_dir: Path, has_e
         if result.returncode != 0:
             error_msg = f"FFmpeg error: {result.stderr[:500]}"  # Increased from 100 to 500 chars
             if error_logger:
-                sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
+                sid = extract_sid_from_filename(base_file)
                 error_logger.log_composite_error(
                     sid=sid,
                     media_type='video',
@@ -504,7 +483,7 @@ def composite_video(base_file: Path, overlay_file: Path, output_dir: Path, has_e
     except subprocess.TimeoutExpired as e:
         error_msg = "Timeout (video too long - exceeded 5 minutes)"
         if error_logger:
-            sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
+            sid = extract_sid_from_filename(base_file)
             error_logger.log_composite_error(
                 sid=sid,
                 media_type='video',
@@ -518,7 +497,7 @@ def composite_video(base_file: Path, overlay_file: Path, output_dir: Path, has_e
     except Exception as e:
         error_msg = f"Error: {str(e)}"
         if error_logger:
-            sid = base_file.stem.split('_')[-1] if '_' in base_file.stem else 'unknown'
+            sid = extract_sid_from_filename(base_file)
             error_logger.log_composite_error(
                 sid=sid,
                 media_type='video',
