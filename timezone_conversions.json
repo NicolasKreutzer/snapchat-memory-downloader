@@ -1,0 +1,417 @@
+{
+  "conversions": {
+    "31e142dd-ec3e-41ba-a398-e3c8717bab85": {
+      "original_utc": "2025-10-07 21:19:46 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-07 17:19:46 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\images\\2025-10-07_171946_Image_31e142dd-ec3e-41ba-a398-e3c8717bab85.jpg",
+      "file_type": "image",
+      "converted_at": "2025-10-31T23:35:36.831405"
+    },
+    "73714fac-1901-6fec-8247-40bf34969005": {
+      "original_utc": "2025-10-07 22:12:40 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-07 18:12:40 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\images\\2025-10-07_181240_Image_73714fac-1901-6fec-8247-40bf34969005.jpg",
+      "file_type": "image",
+      "converted_at": "2025-10-31T23:35:37.151963"
+    },
+    "fd17dbc3-99ce-268f-701e-1ccd9f5c3159": {
+      "original_utc": "2025-10-08 21:11:28 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-08 17:11:28 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\images\\2025-10-08_171128_Image_fd17dbc3-99ce-268f-701e-1ccd9f5c3159.jpg",
+      "file_type": "image",
+      "converted_at": "2025-10-31T23:35:37.474765"
+    },
+    "9ce001ca-fa94-94c3-5514-8b5c7c118fb6": {
+      "original_utc": "2025-10-16 19:47:03 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-16 15:47:03 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\images\\2025-10-16_154703_Image_9ce001ca-fa94-94c3-5514-8b5c7c118fb6.jpg",
+      "file_type": "image",
+      "converted_at": "2025-10-31T23:35:37.796851"
+    },
+    "45e8e761-a127-1f29-7a1e-e4d02bb85834": {
+      "original_utc": "2025-10-18 03:21:18 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-17 23:21:18 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\images\\2025-10-17_232118_Image_45e8e761-a127-1f29-7a1e-e4d02bb85834.jpg",
+      "file_type": "image",
+      "converted_at": "2025-10-31T23:35:38.115416"
+    },
+    "4dfd13b1-1772-35f3-f324-c27c234a4974": {
+      "original_utc": "2025-10-22 13:41:22 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-22 09:41:22 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\images\\2025-10-22_094122_Image_4dfd13b1-1772-35f3-f324-c27c234a4974.jpg",
+      "file_type": "image",
+      "converted_at": "2025-10-31T23:35:38.432216"
+    },
+    "bde2dd9d-db91-2327-08e7-805b5ff81b02": {
+      "original_utc": "2025-09-26 22:25:23 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-09-26 18:25:23 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-09-26_182523_Video_bde2dd9d-db91-2327-08e7-805b5ff81b02.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:38.761626"
+    },
+    "b8aa8d90-e4d9-5d04-7433-589d200987df": {
+      "original_utc": "2025-09-26 22:27:18 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-09-26 18:27:18 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-09-26_182718_Video_b8aa8d90-e4d9-5d04-7433-589d200987df.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:39.095516"
+    },
+    "6c0a30e6-f9a8-4960-7b10-59d494c56cf8": {
+      "original_utc": "2025-09-27 15:18:04 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-09-27 11:18:04 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-09-27_111804_Video_6c0a30e6-f9a8-4960-7b10-59d494c56cf8.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:39.436695"
+    },
+    "47a9a323-f4ca-fadf-6076-dd5c4326349f": {
+      "original_utc": "2025-09-30 13:27:48 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-09-30 09:27:48 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-09-30_092748_Video_47a9a323-f4ca-fadf-6076-dd5c4326349f.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:39.757592"
+    },
+    "e9ae7497-24d6-3a92-d9de-11e925b86579": {
+      "original_utc": "2025-09-30 13:34:15 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-09-30 09:34:15 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-09-30_093415_Video_e9ae7497-24d6-3a92-d9de-11e925b86579.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:40.077426"
+    },
+    "24973225-c4e3-3e4b-85ea-77b56771458d": {
+      "original_utc": "2025-10-05 15:03:35 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-05 11:03:35 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-05_110335_Video_24973225-c4e3-3e4b-85ea-77b56771458d.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:40.401913"
+    },
+    "1556cbd1-b770-3be8-68dc-3c6ae9060541": {
+      "original_utc": "2025-10-05 16:24:23 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-05 12:24:23 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-05_122423_Video_1556cbd1-b770-3be8-68dc-3c6ae9060541.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:40.743349"
+    },
+    "ced0c70a-7c2f-299a-4dce-62e1dc70287d": {
+      "original_utc": "2025-10-06 13:28:29 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-06 09:28:29 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-06_092829_Video_ced0c70a-7c2f-299a-4dce-62e1dc70287d.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:41.086238"
+    },
+    "3bf1f375-356e-bf0f-7107-5fd0525f026c": {
+      "original_utc": "2025-10-07 14:31:02 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-07 10:31:02 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-07_103102_Video_3bf1f375-356e-bf0f-7107-5fd0525f026c.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:41.416648"
+    },
+    "b71310b4-620f-127f-b655-784a5b5bb955": {
+      "original_utc": "2025-10-07 15:39:18 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-07 11:39:18 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-07_113918_Video_b71310b4-620f-127f-b655-784a5b5bb955.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:41.741901"
+    },
+    "93f3fd10-db66-9709-6af5-ce4400e771bd": {
+      "original_utc": "2025-10-08 13:04:59 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-08 09:04:59 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-08_090459_Video_93f3fd10-db66-9709-6af5-ce4400e771bd.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:42.064483"
+    },
+    "41f5ac79-2dcd-a62a-b7eb-c76fbe2c32a7": {
+      "original_utc": "2025-10-08 22:15:09 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-08 18:15:09 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-08_181509_Video_41f5ac79-2dcd-a62a-b7eb-c76fbe2c32a7.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:42.399187"
+    },
+    "8cdf9f27-120e-3183-a3f5-6e548184a712": {
+      "original_utc": "2025-10-08 22:45:55 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-08 18:45:55 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-08_184555_Video_8cdf9f27-120e-3183-a3f5-6e548184a712.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:42.733855"
+    },
+    "d41526cb-84de-d280-b37d-4a6ceb738735": {
+      "original_utc": "2025-10-09 23:53:42 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-09 19:53:42 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-09_195342_Video_d41526cb-84de-d280-b37d-4a6ceb738735.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:43.054400"
+    },
+    "36e9934c-577f-9d55-db5b-ba32596604a1": {
+      "original_utc": "2025-10-10 21:05:01 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-10 17:05:01 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-10_170501_Video_36e9934c-577f-9d55-db5b-ba32596604a1.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:43.378675"
+    },
+    "791ac298-cecf-d0f9-7afa-e6c602533ff9": {
+      "original_utc": "2025-10-11 19:03:28 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-11 15:03:28 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-11_150328_Video_791ac298-cecf-d0f9-7afa-e6c602533ff9.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:43.701487"
+    },
+    "973d1eea-38aa-bec4-c570-b97e92b19a63": {
+      "original_utc": "2025-10-13 22:20:55 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-13 18:20:55 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-13_182055_Video_973d1eea-38aa-bec4-c570-b97e92b19a63.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:44.027049"
+    },
+    "4d837295-eb5e-8503-bcac-bfdb4c1f5172": {
+      "original_utc": "2025-10-14 21:23:04 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-14 17:23:04 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-14_172304_Video_4d837295-eb5e-8503-bcac-bfdb4c1f5172.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:44.358558"
+    },
+    "c700da57-dbf8-b795-3c97-f11863547e06": {
+      "original_utc": "2025-10-14 23:05:51 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-14 19:05:51 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-14_190551_Video_c700da57-dbf8-b795-3c97-f11863547e06.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:44.685436"
+    },
+    "485c9920-2408-dafd-6423-d32ad27eecb6": {
+      "original_utc": "2025-10-15 14:37:45 UTC",
+      "gps_coordinates": {
+        "latitude": 42.331623,
+        "longitude": -83.045105
+      },
+      "detected_timezone": "America/New_York",
+      "local_timestamp": "2025-10-15 10:37:45 EDT",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-15_103745_Video_485c9920.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:45.413559"
+    },
+    "9f9eb970-7c64-ed18-7ba4-23fbc0bd219c": {
+      "original_utc": "2025-10-15 22:31:51 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-15 18:31:51 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-15_183151_Video_9f9eb970-7c64-ed18-7ba4-23fbc0bd219c.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:45.740463"
+    },
+    "303642df-0348-d82f-1ece-a07bc5907558": {
+      "original_utc": "2025-10-17 15:36:40 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-17 11:36:40 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-17_113640_Video_303642df-0348-d82f-1ece-a07bc5907558.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:46.063378"
+    },
+    "bb8d612d-a372-d1bc-1477-3291c1343a70": {
+      "original_utc": "2025-10-18 16:28:24 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-18 12:28:24 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-18_122824_Video_bb8d612d-a372-d1bc-1477-3291c1343a70.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:46.395364"
+    },
+    "baadcaa1-ab1b-41e4-876c-097cd7018bb8": {
+      "original_utc": "2025-10-18 16:28:47 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-18 12:28:47 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-18_122847_Video_baadcaa1-ab1b-41e4-876c-097cd7018bb8.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:46.723800"
+    },
+    "03169b3a-caa2-01a0-6d08-82445c14d44b": {
+      "original_utc": "2025-10-18 16:34:28 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-18 12:34:28 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-18_123428_Video_03169b3a-caa2-01a0-6d08-82445c14d44b.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:47.053177"
+    },
+    "a13e55ba-4c62-6f0b-65c2-93d21bb36553": {
+      "original_utc": "2025-10-19 03:28:50 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-18 23:28:50 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-18_232850_Video_a13e55ba-4c62-6f0b-65c2-93d21bb36553.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:47.376736"
+    },
+    "16745961-12f1-c09d-5d13-006821221339": {
+      "original_utc": "2025-10-19 03:31:37 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-18 23:31:37 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-18_233137_Video_16745961-12f1-c09d-5d13-006821221339.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:47.702171"
+    },
+    "0b4beddc-19e6-5ce2-3f18-7981fe5872fa": {
+      "original_utc": "2025-10-19 15:07:52 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-19 11:07:52 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-19_110752_Video_0b4beddc-19e6-5ce2-3f18-7981fe5872fa.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:48.023437"
+    },
+    "1051a808-7b51-1594-6d83-68f1606d18fb": {
+      "original_utc": "2025-10-19 21:23:11 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-19 17:23:11 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-19_172311_Video_1051a808-7b51-1594-6d83-68f1606d18fb.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:48.355210"
+    },
+    "37264b53-b7a9-e270-d49b-bf15b79c14e9": {
+      "original_utc": "2025-10-20 01:38:32 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-19 21:38:32 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-19_213832_Video_37264b53-b7a9-e270-d49b-bf15b79c14e9.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:48.674274"
+    },
+    "8e7bbe9f-5284-259f-1dd1-c0d38af54276": {
+      "original_utc": "2025-10-20 01:40:46 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-19 21:40:46 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-19_214046_Video_8e7bbe9f-5284-259f-1dd1-c0d38af54276.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:49.000938"
+    },
+    "c16d06d8-5159-776b-0a20-0065c1d623aa": {
+      "original_utc": "2025-10-20 02:48:24 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-19 22:48:24 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-19_224824_Video_c16d06d8-5159-776b-0a20-0065c1d623aa.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:49.343334"
+    },
+    "ab338694-bb8b-fdce-b7b6-fec16f1377ce": {
+      "original_utc": "2025-10-22 01:51:37 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-21 21:51:37 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-21_215137_Video_ab338694-bb8b-fdce-b7b6-fec16f1377ce.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:49.668711"
+    },
+    "91ea70d4-cccb-58a2-bdb2-8a3920bf0115": {
+      "original_utc": "2025-10-23 22:10:46 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-23 18:10:46 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-23_181046_Video_91ea70d4-cccb-58a2-bdb2-8a3920bf0115.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:49.997612"
+    },
+    "8eb26b7b-f8a9-cf47-5d94-3a3624a5d49a": {
+      "original_utc": "2025-10-26 00:04:08 UTC",
+      "gps_coordinates": null,
+      "detected_timezone": "system_local",
+      "local_timestamp": "2025-10-25 20:04:08 Eastern Daylight Time",
+      "utc_offset": "-04:00",
+      "file_path": "memories\\videos\\2025-10-25_200408_Video_8eb26b7b-f8a9-cf47-5d94-3a3624a5d49a.mp4",
+      "file_type": "video",
+      "converted_at": "2025-10-31T23:35:50.319872"
+    }
+  }
+}
