@@ -114,6 +114,7 @@ class ProgressTracker:
         self.progress['downloaded'][sid] = {
             'date': memory['date'],  # Always UTC
             'media_type': memory['media_type'],
+            'location': memory.get('location', None),  # Store GPS coordinates
             'timestamp': datetime.now().isoformat(),
             'timezone_converted': False,  # Track if converted to local timezone
             'local_date': None  # Will be set when timezone is converted
@@ -319,6 +320,19 @@ class ProgressTracker:
         """
         if sid in self.progress['downloaded']:
             return self.progress['downloaded'][sid].get('local_date')
+        return None
+
+    def get_location(self, sid: str) -> str:
+        """Get the GPS location for a SID.
+
+        Args:
+            sid: Session ID
+
+        Returns:
+            Location string or None
+        """
+        if sid in self.progress['downloaded']:
+            return self.progress['downloaded'][sid].get('location')
         return None
 
     def verify_downloads(self, memories: List[Dict]) -> Dict:
