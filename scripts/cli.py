@@ -51,7 +51,6 @@ def show_interactive_menu():
         "[?]  Verify downloads",
         "[*]  Verify composited files",
         "[~]  Convert timezone (UTC -> GPS-based timezone)",
-        "[!]  Advanced options",
         "[X]  Exit"
     ]
 
@@ -87,11 +86,6 @@ def get_submenu_choice(title, options):
 
 def run_operation(args, downloader):
     """Execute the selected operation based on args."""
-    # Run GPS timezone re-conversion (for already converted files)
-    if hasattr(args, 'reconvert_gps_timezone') and args.reconvert_gps_timezone:
-        print("Re-converting files from old local timezone to GPS-based timezone...")
-        downloader.reconvert_to_gps_timezone()
-        return
 
     # Run timezone conversion
     if args.convert_timezone:
@@ -193,8 +187,6 @@ def main():
                         help='Force rebuild of overlay pairs cache')
     parser.add_argument('--convert-timezone', action='store_true',
                         help='Convert all file timestamps and filenames from UTC to GPS-based timezone')
-    parser.add_argument('--reconvert-gps-timezone', action='store_true',
-                        help='Re-convert files from old system timezone to GPS-based timezone')
     parser.add_argument('--interactive', action='store_true',
                         help='Show interactive menu')
 
@@ -207,7 +199,6 @@ def main():
         args.apply_overlays,
         args.verify_composites,
         args.convert_timezone,
-        args.reconvert_gps_timezone
     ])
 
     # Check dependencies before starting
@@ -230,7 +221,6 @@ def main():
             args.apply_overlays = False
             args.verify_composites = False
             args.convert_timezone = False
-            args.reconvert_gps_timezone = False
             args.images_only = False
             args.videos_only = False
 
@@ -253,19 +243,6 @@ def main():
                 args.verify_composites = True
             elif menu_choice == 4:  # Convert timezone
                 args.convert_timezone = True
-            elif menu_choice == 5:  # Advanced options
-                submenu = get_submenu_choice(
-                    "[!] Advanced options:",
-                    [
-                        "[1] Re-convert from old local timezone to GPS-based timezone",
-                        "[<] Back to main menu"
-                    ]
-                )
-                if submenu == 0:  # Re-convert to GPS timezone
-                    args.reconvert_gps_timezone = True
-                else:  # Back to menu
-                    continue
-
             # Execute the operation
             run_operation(args, downloader)
 
