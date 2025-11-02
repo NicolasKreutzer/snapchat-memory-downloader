@@ -113,6 +113,11 @@ def add_gps_metadata(file_path: Path, memory: Dict, has_exiftool: bool):
         return
 
     lat, lon = coords
+    
+    # Skip if coordinates are (0,0) - those are blank and should not be written to the file.
+    if lat == 0.0 and lon == 0.0:
+        return
+    
     file_ext = file_path.suffix.lower()
 
     # Only process media files (skip overlays which are PNGs without location context)
