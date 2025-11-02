@@ -91,7 +91,22 @@ class SnapchatDownloader:
 
         if to_download == 0:
             print("All memories already downloaded!")
-            print("Checking for missing GPS data in progress file...\n")
+
+            # Check if GPS backfill is needed (one-time operation for existing users)
+            needs_gps_backfill = False
+            sample_size = min(10, len(memories))
+            for memory in memories[:sample_size]:
+                sid = memory['sid']
+                existing_entry = self.progress_tracker.progress['downloaded'].get(sid, {})
+                if (existing_entry.get('location') is None or existing_entry.get('location') == '') and memory.get('location'):
+                    needs_gps_backfill = True
+                    break
+
+            if not needs_gps_backfill:
+                return  # Exit early - no backfill needed
+
+            print("Detected missing GPS data in progress file.")
+            print("Backfilling GPS coordinates from HTML (one-time operation)...\n")
 
         # Download each memory
         downloaded_count = 0
