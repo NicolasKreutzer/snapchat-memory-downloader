@@ -279,15 +279,25 @@ python download_snapchat_memories.py --html "path/to/memories_history.html" \
 
 ### Timezone Conversion
 
-By default, all files are downloaded with UTC timestamps (matching Snapchat's format). You can convert all timestamps and filenames to your local timezone.
+By default, all files are downloaded with UTC timestamps (matching Snapchat's format). You can convert all timestamps and filenames to **GPS-based timezones** where the photo/video was actually taken!
 
 **How it works:**
-1. Reads UTC dates from `download_progress.json` for each file
-2. Converts timestamps to your system's local timezone
-3. Renames files to use local time in filenames
-4. Updates file modification/creation times to local time
-5. Tracks conversion status to avoid duplicate conversions
-6. Preserves UTC dates in progress file for reference
+1. Reads UTC dates and GPS coordinates from `download_progress.json` for each file
+2. Uses GPS coordinates to detect the timezone where the memory was taken (e.g., "America/New_York", "Europe/Paris")
+3. Converts timestamps to the detected timezone (falls back to system timezone if GPS not available)
+4. Renames files to use local time in filenames
+5. Updates file modification/creation times to local time
+6. Updates EXIF metadata with proper timezone offset (e.g., "-04:00" for EDT) if ExifTool is available
+7. Tracks detailed conversion info in `timezone_conversions.json`
+
+**Requirements:**
+```bash
+# Required for GPS-based timezone detection
+pip install timezonefinder
+
+# Python < 3.9 only (Python 3.9+ has built-in zoneinfo)
+pip install pytz
+```
 
 **Usage:**
 ```bash
@@ -300,20 +310,56 @@ python download_snapchat_memories.py --convert-timezone
 - All overlays in `memories/overlays/`
 - All composited files in `memories/composited/images/` and `memories/composited/videos/`
 
-**Example:**
-- Before: `2025-10-16_194703_Image_9ce001ca.jpg` (UTC: 7:47 PM)
-- After: `2025-10-16_124703_Image_9ce001ca.jpg` (EST: 12:47 PM, assuming EST timezone)
+**Examples:**
 
-**Progress tracking:**
-The `download_progress.json` file is updated to track:
-- `timezone_converted`: Whether the file has been converted
-- `local_date`: The date/time in your local timezone
-- `date`: Original UTC date (preserved for reference)
+Photo taken in New York (GPS: 40.7128° N, 74.0060° W):
+- Before: `2025-10-16_194703_Image_9ce001ca.jpg` (UTC: 7:47 PM)
+- After: `2025-10-16_154703_Image_9ce001ca.jpg` (EDT: 3:47 PM in America/New_York timezone)
+- EXIF metadata: DateTimeOriginal = "2025:10:16 15:47:03", OffsetTimeOriginal = "-04:00"
+
+Photo taken in Paris (GPS: 48.8566° N, 2.3522° E):
+- Before: `2025-10-16_194703_Image_9ce001ca.jpg` (UTC: 7:47 PM)
+- After: `2025-10-16_214703_Image_9ce001ca.jpg` (CEST: 9:47 PM in Europe/Paris timezone)
+- EXIF metadata: DateTimeOriginal = "2025:10:16 21:47:03", OffsetTimeOriginal = "+02:00"
+
+**Tracking:**
+The script creates/updates two tracking files:
+
+1. **`download_progress.json`** - Updated to track:
+   - `timezone_converted`: Whether the file has been converted
+   - `local_date`: The date/time in local timezone
+   - `location`: GPS coordinates (added during download)
+   - `date`: Original UTC date (preserved for reference)
+
+2. **`timezone_conversions.json`** - New file tracking detailed conversion info:
+   - Original UTC timestamp
+   - GPS coordinates used
+   - Detected timezone name
+   - Converted local timestamp
+   - UTC offset (e.g., "-04:00")
+   - File path and type
+   - Conversion timestamp
+
+**EXIF Metadata:**
+If ExifTool is installed, the script properly sets:
+- `DateTimeOriginal`: Local time when photo was taken
+- `OffsetTimeOriginal`: UTC offset for that timezone (e.g., "-04:00")
+- `OffsetTime`: UTC offset
+- `OffsetTimeDigitized`: UTC offset
+
+This means photo software can correctly display the time in any timezone!
 
 **Safety:**
 - Safe to run multiple times - skips already converted files
 - Original UTC dates preserved in progress file
-- Can be undone by re-downloading files (they'll be UTC again)
+- GPS coordinates and timezone info saved for reference
+- Falls back to system timezone if GPS not available
+
+**Statistics:**
+After conversion, the script shows:
+- Number of GPS-based conversions vs system timezone fallbacks
+- List of all timezones detected with file counts
+- Example: "America/New_York: 150 files, Europe/London: 25 files"
 
 ### File Naming Convention
 
@@ -584,12 +630,22 @@ If you need to build manually:
 
 ## Recent Updates
 
-### v1.2.0 - Timezone Conversion
+### v1.3.0 - GPS-Based Timezone Conversion
+- ✅ **GPS-based timezone detection** - uses GPS coordinates to detect timezone where photo was taken
+- ✅ **Automatic timezone lookup** with `timezonefinder` library
+- ✅ **EXIF timezone metadata** - properly sets OffsetTimeOriginal and other timezone tags
+- ✅ **Detailed tracking** with new `timezone_conversions.json` file
+- ✅ **Multi-timezone support** - handles memories from different timezones automatically
+- ✅ **Fallback to system timezone** if GPS coordinates not available
+- ✅ **Statistics display** - shows timezone distribution across your memories
+
+### v1.2.0 - Timezone Conversion (Legacy)
 - ✅ New `--convert-timezone` command to convert all files from UTC to local timezone
 - ✅ Converts both filenames and file timestamps
 - ✅ Tracks conversion status in progress file
 - ✅ Preserves original UTC dates for reference
 - ✅ Safe to run multiple times (skips already converted files)
+- ⚠️ **Note:** Upgraded to GPS-based timezone detection in v1.3.0
 
 ### v1.1.0 - Automatic Metadata Copying
 - ✅ Metadata (GPS/EXIF) now automatically copied when ExifTool is available

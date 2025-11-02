@@ -70,6 +70,26 @@ def set_file_timestamps(file_path: Path, memory: Dict, has_pywin32: bool):
                 pass
 
 
+def is_valid_gps_coordinates(coords: Optional[Tuple[float, float]]) -> bool:
+    """Check if GPS coordinates are valid (not None and not both 0).
+
+    Args:
+        coords: Tuple of (latitude, longitude) or None
+
+    Returns:
+        True if coordinates are valid, False otherwise
+    """
+    if coords is None:
+        return False
+
+    lat, lon = coords
+    # Check if both coordinates are 0 (invalid GPS data)
+    if lat == 0.0 and lon == 0.0:
+        return False
+
+    return True
+
+
 def parse_location(memory: Dict) -> Optional[Tuple[float, float]]:
     """Parse latitude and longitude from location string.
 
@@ -109,7 +129,8 @@ def add_gps_metadata(file_path: Path, memory: Dict, has_exiftool: bool):
         return
 
     coords = parse_location(memory)
-    if not coords:
+    # Skip if GPS data is missing or invalid (both lat and lon are 0)
+    if not is_valid_gps_coordinates(coords):
         return
 
     lat, lon = coords

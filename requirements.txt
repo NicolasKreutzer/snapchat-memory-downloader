@@ -1,0 +1,16 @@
+# Core dependencies
+requests>=2.31.0
+
+# Optional dependencies for enhanced functionality
+# GPS-based timezone conversion (recommended)
+timezonefinder>=6.0.0
+
+# Timezone support for Python < 3.9
+# Python 3.9+ includes zoneinfo built-in
+pytz>=2023.3; python_version < '3.9'
+
+# Image overlay compositing
+Pillow>=10.0.0
+
+# Windows-specific: File creation time support
+pywin32>=306; sys_platform == 'win32'

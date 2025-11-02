@@ -37,7 +37,7 @@ class ProgressTracker:
                 print(f"File: {self.progress_file}")
                 print(f"Error: {e}")
                 print(f"\nThe progress file contains invalid JSON and cannot be loaded.")
-                print(f"Please restore from backup or delete the file to start fresh.")
+                print(f"Please delete the file to start fresh.")
                 print(f"{'='*70}\n")
                 import sys
                 sys.exit(1)
@@ -59,37 +59,11 @@ class ProgressTracker:
         }
 
     def save_progress(self):
-        """Save download progress to JSON file with backup and atomic write."""
-        import shutil
-        import tempfile
-
-        # Create backup of existing file before saving
-        backup_file = self.progress_file + '.backup'
-        if os.path.exists(self.progress_file):
-            try:
-                shutil.copy2(self.progress_file, backup_file)
-            except Exception as e:
-                print(f"WARNING: Could not create backup: {e}")
-
-        # Write to temporary file first (atomic write)
-        temp_file = self.progress_file + '.tmp'
+        """Save download progress to JSON file."""
         try:
-            with open(temp_file, 'w', encoding='utf-8') as f:
+            with open(self.progress_file, 'w', encoding='utf-8') as f:
                 json.dump(self.progress, f, indent=2)
-
-            # Replace original file with temp file (atomic on most systems)
-            if os.path.exists(self.progress_file):
-                os.replace(temp_file, self.progress_file)
-            else:
-                os.rename(temp_file, self.progress_file)
-
         except Exception as e:
-            # Clean up temp file if it exists
-            if os.path.exists(temp_file):
-                try:
-                    os.remove(temp_file)
-                except:
-                    pass
             print(f"ERROR: Failed to save progress file: {e}")
             raise
 
@@ -114,6 +88,7 @@ class ProgressTracker:
         self.progress['downloaded'][sid] = {
             'date': memory['date'],  # Always UTC
             'media_type': memory['media_type'],
+            'location': memory.get('location', None),  # Store GPS coordinates
             'timestamp': datetime.now().isoformat(),
             'timezone_converted': False,  # Track if converted to local timezone
             'local_date': None  # Will be set when timezone is converted
@@ -319,6 +294,19 @@ class ProgressTracker:
         """
         if sid in self.progress['downloaded']:
             return self.progress['downloaded'][sid].get('local_date')
+        return None
+
+    def get_location(self, sid: str) -> str:
+        """Get the GPS location for a SID.
+
+        Args:
+            sid: Session ID
+
+        Returns:
+            Location string or None
+        """
+        if sid in self.progress['downloaded']:
+            return self.progress['downloaded'][sid].get('location')
         return None
 
     def verify_downloads(self, memories: List[Dict]) -> Dict:

@@ -19,10 +19,15 @@ from compositor import find_overlay_pairs, composite_image, composite_video
 from error_logger import ErrorLogger
 from timezone_converter import (
     utc_to_local,
+    utc_to_gps_timezone,
     generate_local_filename,
     parse_filename_for_sid,
-    convert_file_timestamps_to_local
+    convert_file_timestamps_to_local,
+    update_exif_timezone,
+    check_gps_timezone_requirements,
+    parse_gps_coordinates
 )
+from timezone_tracker import TimezoneConversionTracker
 
 
 class SnapchatDownloader:
@@ -86,7 +91,22 @@ class SnapchatDownloader:
 
         if to_download == 0:
             print("All memories already downloaded!")
-            return
+
+            # Check if GPS backfill is needed (one-time operation for existing users)
+            needs_gps_backfill = False
+            sample_size = min(10, len(memories))
+            for memory in memories[:sample_size]:
+                sid = memory['sid']
+                existing_entry = self.progress_tracker.progress['downloaded'].get(sid, {})
+                if (existing_entry.get('location') is None or existing_entry.get('location') == '') and memory.get('location'):
+                    needs_gps_backfill = True
+                    break
+
+            if not needs_gps_backfill:
+                return  # Exit early - no backfill needed
+
+            print("Detected missing GPS data in progress file.")
+            print("Backfilling GPS coordinates from HTML (one-time operation)...\n")
 
         # Download each memory
         downloaded_count = 0
@@ -97,7 +117,18 @@ class SnapchatDownloader:
             sid = memory['sid']
 
             if self.progress_tracker.is_downloaded(sid):
-                print(f"[{i}/{total}] Skipping {sid[:8]}... (already downloaded)")
+                # Update GPS location in progress file if missing
+                existing_entry = self.progress_tracker.progress['downloaded'].get(sid, {})
+                current_location = existing_entry.get('location')
+                new_location = memory.get('location')
+
+                # Update if location is missing or None
+                if (current_location is None or current_location == '') and new_location:
+                    existing_entry['location'] = new_location
+                    self.progress_tracker.save_progress()
+                    print(f"[{i}/{total}] Updating GPS for {sid[:8]}... {new_location[:30]}...")
+                else:
+                    print(f"[{i}/{total}] Skipping {sid[:8]}... (already downloaded)")
                 skipped_count += 1
                 continue
 
@@ -709,29 +740,106 @@ class SnapchatDownloader:
         }
 
     def convert_all_to_local_timezone(self):
-        """Convert all file timestamps and filenames from UTC to local timezone.
+        """Convert all file timestamps and filenames from UTC to GPS-based timezone.
 
         This function:
         1. Scans all files in images/, videos/, overlays/, and composited/ folders
-        2. Uses download_progress.json to get UTC dates for each file
-        3. Renames files to use local timezone
-        4. Updates file modification/creation timestamps to local time
-        5. Tracks conversion status in progress file
+        2. Uses download_progress.json to get UTC dates and GPS coordinates
+        3. Determines timezone from GPS coordinates (falls back to system timezone)
+        4. Renames files to use detected timezone
+        5. Updates file modification/creation timestamps to local time
+        6. Updates EXIF metadata with timezone offset (if ExifTool available)
+        7. Tracks conversion details in timezone_conversions.json
         """
-        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Converting files from UTC to local timezone...")
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Converting files from UTC to GPS-based timezone...")
 
-        # Get system timezone info
+        # Check requirements
+        requirements = check_gps_timezone_requirements()
+
+        if not requirements['gps_timezone_available']:
+            print(f"\n{'='*70}")
+            print(f"WARNING: GPS-based timezone conversion is NOT available!")
+            print(f"{'='*70}")
+
+            # Show what's missing
+            if not requirements['timezonefinder']:
+                print(f"\nMissing required library: timezonefinder")
+                print(f"  Install with: pip install timezonefinder")
+
+            if not requirements['timezone_lib']:
+                print(f"\nMissing timezone library:")
+                print(f"  Python 3.9+: zoneinfo is built-in (no action needed)")
+                print(f"  Python < 3.9: Install pytz with: pip install pytz")
+
+            print(f"\nWithout GPS-based timezone conversion:")
+            print(f"  - All files will be converted to your SYSTEM timezone ({utc_to_local('2025-01-01 00:00:00 UTC')[0].tzname()})")
+            print(f"  - Photos taken in different timezones will ALL use the same timezone")
+            print(f"  - EXIF timezone metadata will NOT be set correctly")
+            print(f"\nWith GPS-based timezone conversion:")
+            print(f"  - Each file uses the timezone where it was taken (e.g., NYC photos use EDT)")
+            print(f"  - Photos from different locations get correct local times")
+            print(f"  - EXIF metadata includes proper timezone offsets")
+
+            print(f"\n{'='*70}")
+            response = input(f"Continue with system timezone only? (yes/no): ").strip().lower()
+            print(f"{'='*70}\n")
+
+            if response not in ['yes', 'y']:
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Timezone conversion cancelled.")
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Install timezonefinder and try again:")
+                print(f"[{datetime.now().strftime('%H:%M:%S')}]   pip install timezonefinder")
+                return
+
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Proceeding with system timezone fallback...")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] GPS-based timezone conversion enabled (using {requirements['timezone_lib_name']})")
+
+        # Backfill GPS data from HTML before converting
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Checking for missing GPS data in progress file...")
+        memories = parse_html_file(self.html_file)
+
+        backfilled_sids = set()
+        backfilled_count = 0
+        for memory in memories:
+            sid = memory['sid']
+            if sid in self.progress_tracker.progress.get('downloaded', {}):
+                existing_entry = self.progress_tracker.progress['downloaded'][sid]
+                current_location = existing_entry.get('location')
+                new_location = memory.get('location')
+
+                # Update if location is missing or None
+                if (current_location is None or current_location == '') and new_location:
+                    existing_entry['location'] = new_location
+                    backfilled_sids.add(sid)
+                    backfilled_count += 1
+
+        if backfilled_count > 0:
+            self.progress_tracker.save_progress()
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Backfilled GPS data for {backfilled_count} files")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] These files will be reconverted with GPS-based timezones")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] No GPS data backfill needed")
+
+        # Initialize timezone conversion tracker
+        tz_tracker = TimezoneConversionTracker()
+
+        # Get system timezone info for fallback
         local_dt, local_str = utc_to_local("2025-01-01 00:00:00 UTC")
         timezone_name = local_dt.tzname()
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] System timezone: {timezone_name}")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] System timezone (fallback): {timezone_name}")
 
         # Initialize timezone_converted field for existing entries if missing
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Checking progress file for missing timezone fields...")
         updated_count = 0
         for sid in self.progress_tracker.progress.get('downloaded', {}).keys():
-            if 'timezone_converted' not in self.progress_tracker.progress['downloaded'][sid]:
-                self.progress_tracker.progress['downloaded'][sid]['timezone_converted'] = False
-                self.progress_tracker.progress['downloaded'][sid]['local_date'] = None
+            entry = self.progress_tracker.progress['downloaded'][sid]
+            if 'timezone_converted' not in entry:
+                entry['timezone_converted'] = False
+                entry['local_date'] = None
+                updated_count += 1
+            # Add location field if missing (for older progress files)
+            if 'location' not in entry:
+                entry['location'] = None
                 updated_count += 1
 
         # Also check composited files
@@ -778,9 +886,9 @@ class SnapchatDownloader:
                         continue
 
                     # Find full SID in progress file (match first 8 chars)
-                    # For composited files, check both downloaded and composited sections
                     full_sid = None
                     utc_date = None
+                    location = None
                     is_composited_file = "_composited" in file_path.stem
 
                     # First try to find in downloaded section
@@ -788,6 +896,7 @@ class SnapchatDownloader:
                         if sid.startswith(sid_short):
                             full_sid = sid
                             utc_date = self.progress_tracker.get_utc_date(full_sid)
+                            location = self.progress_tracker.get_location(full_sid)
                             break
 
                     if not full_sid:
@@ -795,19 +904,9 @@ class SnapchatDownloader:
                         failed_files += 1
                         continue
 
-                    # Check if already converted
-                    # For composited files, also check if it's marked in the composited section
-                    already_converted = False
-                    if is_composited_file:
-                        # Check composited section for timezone conversion tracking
-                        media_type_key = 'images' if 'images' in str(folder) else 'videos'
-                        composited_dict = self.progress_tracker.progress.get('composited', {}).get(media_type_key, {})
-                        if sid_short in composited_dict:
-                            already_converted = composited_dict[sid_short].get('timezone_converted', False)
-                    else:
-                        already_converted = self.progress_tracker.is_timezone_converted(full_sid)
-
-                    if already_converted:
+                    # Check if already converted (using timezone_conversions.json)
+                    # BUT reconvert if GPS data was just backfilled (to use GPS-based timezone)
+                    if tz_tracker.is_converted(full_sid) and full_sid not in backfilled_sids:
                         skipped_files += 1
                         continue
 
@@ -817,59 +916,88 @@ class SnapchatDownloader:
                         failed_files += 1
                         continue
 
+                    # Convert UTC to GPS-based timezone
+                    local_dt, local_str, utc_offset, detected_tz = utc_to_gps_timezone(utc_date, location)
+
                     # Determine file type and suffix
                     media_type = self.progress_tracker.progress['downloaded'][full_sid].get('media_type', 'Image')
                     suffix = ""
+                    file_type_desc = media_type.lower()  # 'image' or 'video'
                     if "_overlay" in file_path.stem:
                         suffix = "_overlay"
+                        file_type_desc += "_overlay"
                     elif "_composited" in file_path.stem:
                         suffix = "_composited"
+                        file_type_desc = f"composited_{file_type_desc}"
 
-                    # Generate new filename with local timezone
+                    # Generate new filename with GPS-based timezone
                     extension = file_path.suffix[1:]  # Remove the dot
-                    new_filename = generate_local_filename(
-                        utc_date, media_type, sid_short, extension, suffix
-                    )
+                    date_part = local_dt.strftime('%Y-%m-%d')
+                    time_part = local_dt.strftime('%H%M%S')
+                    new_filename = f"{date_part}_{time_part}_{media_type}_{sid_short}{suffix}.{extension}"
                     new_path = file_path.parent / new_filename
 
-                    # Skip if filename hasn't changed (already in local time or same as UTC)
-                    if new_path == file_path:
-                        # Still update timestamps
-                        convert_file_timestamps_to_local(file_path, utc_date, self.has_pywin32)
-
-                        # Mark as converted
-                        _, local_date_str = utc_to_local(utc_date)
-                        if is_composited_file:
-                            # Mark composited file as converted in its section
-                            media_type_key = 'images' if 'images' in str(folder) else 'videos'
-                            if sid_short in self.progress_tracker.progress.get('composited', {}).get(media_type_key, {}):
-                                self.progress_tracker.progress['composited'][media_type_key][sid_short]['timezone_converted'] = True
-                                self.progress_tracker.progress['composited'][media_type_key][sid_short]['local_date'] = local_date_str
-                                self.progress_tracker.save_progress()
-                        else:
-                            self.progress_tracker.mark_timezone_converted(full_sid, local_date_str)
-
-                        converted_files += 1
-                        continue
-
-                    # Rename file
+                    # Process the file
                     try:
-                        file_path.rename(new_path)
+                        # Rename file if needed
+                        if new_path != file_path:
+                            file_path.rename(new_path)
+                            final_path = new_path
+                        else:
+                            final_path = file_path
 
                         # Update file timestamps
-                        convert_file_timestamps_to_local(new_path, utc_date, self.has_pywin32)
+                        local_timestamp = local_dt.timestamp()
+                        os.utime(final_path, (local_timestamp, local_timestamp))
+
+                        # Set creation time (Windows only with pywin32)
+                        if self.has_pywin32 and os.name == 'nt':
+                            try:
+                                import pywintypes
+                                import win32file
+                                import win32con
+
+                                win_timestamp = pywintypes.Time(local_timestamp)
+                                handle = win32file.CreateFile(
+                                    str(final_path),
+                                    win32con.GENERIC_WRITE,
+                                    win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE,
+                                    None,
+                                    win32con.OPEN_EXISTING,
+                                    win32con.FILE_ATTRIBUTE_NORMAL,
+                                    None
+                                )
+                                win32file.SetFileTime(handle, win_timestamp, None, None)
+                                handle.close()
+                            except Exception:
+                                pass
+
+                        # Update EXIF metadata with timezone offset (for images and videos)
+                        if self.has_exiftool:
+                            update_exif_timezone(final_path, local_dt, utc_offset, self.has_exiftool)
+
+                        # Record conversion in timezone tracker
+                        gps_coords = parse_gps_coordinates(location)
+                        tz_tracker.record_conversion(
+                            sid=full_sid,
+                            utc_timestamp=utc_date,
+                            gps_coords=gps_coords,
+                            detected_timezone=detected_tz,
+                            local_timestamp=local_str,
+                            utc_offset=utc_offset,
+                            file_path=str(final_path),
+                            file_type=file_type_desc
+                        )
 
                         # Mark as converted in progress file
-                        _, local_date_str = utc_to_local(utc_date)
                         if is_composited_file:
-                            # Mark composited file as converted in its section
                             media_type_key = 'images' if 'images' in str(folder) else 'videos'
                             if sid_short in self.progress_tracker.progress.get('composited', {}).get(media_type_key, {}):
                                 self.progress_tracker.progress['composited'][media_type_key][sid_short]['timezone_converted'] = True
-                                self.progress_tracker.progress['composited'][media_type_key][sid_short]['local_date'] = local_date_str
+                                self.progress_tracker.progress['composited'][media_type_key][sid_short]['local_date'] = local_str
                                 self.progress_tracker.save_progress()
                         else:
-                            self.progress_tracker.mark_timezone_converted(full_sid, local_date_str)
+                            self.progress_tracker.mark_timezone_converted(full_sid, local_str)
 
                         converted_files += 1
 
@@ -887,4 +1015,289 @@ class SnapchatDownloader:
         print(f"Converted: {converted_files}")
         print(f"Skipped (already converted): {skipped_files}")
         print(f"Failed: {failed_files}")
-        print(f"{'='*60}\n")
+        print(f"{'='*60}")
+
+        # Print timezone statistics
+        stats = tz_tracker.get_stats()
+        if stats['total_conversions'] > 0:
+            print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Timezone Statistics:")
+            print(f"GPS-based conversions: {stats['gps_based_conversions']}")
+            print(f"System timezone fallbacks: {stats['system_based_conversions']}")
+            if stats['timezones']:
+                print(f"\nTimezones detected:")
+                for tz_name, count in sorted(stats['timezones'].items(), key=lambda x: x[1], reverse=True):
+                    print(f"  {tz_name}: {count} files")
+            print(f"\nConversion details saved to: {tz_tracker.tracking_file}")
+            print(f"{'='*60}\n")
+
+    def reconvert_to_gps_timezone(self):
+        """Re-convert files from old system timezone to GPS-based timezone.
+
+        This is for users who previously ran --convert-timezone with the old
+        system (before GPS-based conversion was implemented). It reads the
+        original UTC time from download_progress.json and converts using GPS.
+        """
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Re-converting from old system timezone to GPS-based timezone...")
+
+        # Check requirements
+        requirements = check_gps_timezone_requirements()
+
+        if not requirements['gps_timezone_available']:
+            print(f"\n{'='*70}")
+            print(f"ERROR: GPS-based timezone conversion is NOT available!")
+            print(f"{'='*70}")
+            print(f"\nThis feature requires GPS-based timezone detection.")
+            print(f"Without it, there's no benefit to re-converting files.")
+            print(f"\nInstall required library:")
+            print(f"  pip install timezonefinder")
+            print(f"{'='*70}\n")
+            return
+
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] GPS-based timezone conversion enabled (using {requirements['timezone_lib_name']})")
+
+        # Backfill GPS data from HTML before reconverting
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Checking for missing GPS data in progress file...")
+        memories = parse_html_file(self.html_file)
+
+        backfilled_sids = set()
+        backfilled_count = 0
+        for memory in memories:
+            sid = memory['sid']
+            if sid in self.progress_tracker.progress.get('downloaded', {}):
+                existing_entry = self.progress_tracker.progress['downloaded'][sid]
+                current_location = existing_entry.get('location')
+                new_location = memory.get('location')
+
+                # Update if location is missing or None
+                if (current_location is None or current_location == '') and new_location:
+                    existing_entry['location'] = new_location
+                    backfilled_sids.add(sid)
+                    backfilled_count += 1
+
+        if backfilled_count > 0:
+            self.progress_tracker.save_progress()
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Backfilled GPS data for {backfilled_count} files")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] All files will be reconverted (forced reconversion)")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] No GPS data backfill needed")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] All files will be reconverted (forced reconversion)")
+
+        # Verify we can actually do this conversion
+        can_convert = False
+        sample_check_count = 0
+        for sid, data in self.progress_tracker.progress.get('downloaded', {}).items():
+            if sample_check_count >= 10:  # Check first 10 entries
+                break
+            if data.get('date'):  # UTC date exists
+                can_convert = True
+                sample_check_count += 1
+
+        if not can_convert:
+            print(f"\n{'='*70}")
+            print(f"ERROR: Cannot re-convert - no UTC timestamps found!")
+            print(f"{'='*70}")
+            print(f"\nThis feature requires the original UTC timestamp to be present")
+            print(f"in download_progress.json for each file.")
+            print(f"\nPossible reasons:")
+            print(f"  - Files were downloaded with a very old version of this script")
+            print(f"  - download_progress.json has been modified or corrupted")
+            print(f"  - Files need to be re-downloaded to get UTC timestamps")
+            print(f"{'='*70}\n")
+            return
+
+        # Confirm with user
+        print(f"\n{'='*70}")
+        print(f"This will re-convert files that were previously converted using")
+        print(f"the old system timezone method to use GPS-based timezones.")
+        print(f"\nWhat this does:")
+        print(f"  - Reads original UTC time from download_progress.json")
+        print(f"    (UTC timestamps are preserved, not deleted during conversion)")
+        print(f"  - Uses GPS coordinates to determine correct timezone")
+        print(f"  - Renames files with GPS-based timezone")
+        print(f"  - Updates EXIF metadata with timezone offset")
+        print(f"\nIMPORTANT: Files that were already converted to system timezone")
+        print(f"will be renamed again. Make sure you have a backup if needed.")
+        print(f"{'='*70}")
+        response = input(f"Continue with GPS-based re-conversion? (yes/no): ").strip().lower()
+        print(f"{'='*70}\n")
+
+        if response not in ['yes', 'y']:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Re-conversion cancelled.")
+            return
+
+        # Initialize timezone conversion tracker
+        tz_tracker = TimezoneConversionTracker()
+
+        # Define folders to process
+        folders = [
+            self.output_dir / "images",
+            self.output_dir / "videos",
+            self.output_dir / "overlays",
+            self.output_dir / "composited" / "images",
+            self.output_dir / "composited" / "videos"
+        ]
+
+        total_files = 0
+        converted_files = 0
+        skipped_files = 0
+        failed_files = 0
+
+        for folder in folders:
+            if not folder.exists():
+                continue
+
+            print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Processing {folder.relative_to(self.output_dir)}...")
+
+            for file_path in folder.glob("*.*"):
+                if file_path.is_file():
+                    total_files += 1
+
+                    # Extract SID from filename
+                    sid_short = parse_filename_for_sid(file_path.name)
+                    if not sid_short:
+                        print(f"[{datetime.now().strftime('%H:%M:%S')}] WARNING: Could not parse SID from {file_path.name}")
+                        failed_files += 1
+                        continue
+
+                    # Find full SID in progress file
+                    full_sid = None
+                    utc_date = None
+                    location = None
+
+                    for sid in self.progress_tracker.progress['downloaded'].keys():
+                        if sid.startswith(sid_short):
+                            full_sid = sid
+                            utc_date = self.progress_tracker.get_utc_date(full_sid)
+                            location = self.progress_tracker.get_location(full_sid)
+                            break
+
+                    if not full_sid:
+                        print(f"[{datetime.now().strftime('%H:%M:%S')}] WARNING: SID {sid_short} not found in progress file for {file_path.name}")
+                        failed_files += 1
+                        continue
+
+                    # Get UTC date from progress file
+                    if not utc_date:
+                        print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: No UTC date found for SID {sid_short}")
+                        print(f"[{datetime.now().strftime('%H:%M:%S')}]        Cannot re-convert without original UTC timestamp")
+                        print(f"[{datetime.now().strftime('%H:%M:%S')}]        This file may need to be re-downloaded")
+                        failed_files += 1
+                        continue
+
+                    # Convert UTC to GPS-based timezone
+                    local_dt, local_str, utc_offset, detected_tz = utc_to_gps_timezone(utc_date, location)
+
+                    # Determine file type and suffix
+                    media_type = self.progress_tracker.progress['downloaded'][full_sid].get('media_type', 'Image')
+                    suffix = ""
+                    file_type_desc = media_type.lower()
+                    is_composited_file = "_composited" in file_path.stem
+
+                    if "_overlay" in file_path.stem:
+                        suffix = "_overlay"
+                        file_type_desc += "_overlay"
+                    elif "_composited" in file_path.stem:
+                        suffix = "_composited"
+                        file_type_desc = f"composited_{file_type_desc}"
+
+                    # Generate new filename with GPS-based timezone
+                    extension = file_path.suffix[1:]  # Remove the dot
+                    date_part = local_dt.strftime('%Y-%m-%d')
+                    time_part = local_dt.strftime('%H%M%S')
+                    new_filename = f"{date_part}_{time_part}_{media_type}_{sid_short}{suffix}.{extension}"
+                    new_path = file_path.parent / new_filename
+
+                    # Process the file
+                    try:
+                        # Rename file if needed
+                        if new_path != file_path:
+                            file_path.rename(new_path)
+                            final_path = new_path
+                        else:
+                            final_path = file_path
+                            skipped_files += 1
+                            continue  # No need to update if filename hasn't changed
+
+                        # Update file timestamps
+                        local_timestamp = local_dt.timestamp()
+                        os.utime(final_path, (local_timestamp, local_timestamp))
+
+                        # Set creation time (Windows only with pywin32)
+                        if self.has_pywin32 and os.name == 'nt':
+                            try:
+                                import pywintypes
+                                import win32file
+                                import win32con
+
+                                win_timestamp = pywintypes.Time(local_timestamp)
+                                handle = win32file.CreateFile(
+                                    str(final_path),
+                                    win32con.GENERIC_WRITE,
+                                    win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE,
+                                    None,
+                                    win32con.OPEN_EXISTING,
+                                    win32con.FILE_ATTRIBUTE_NORMAL,
+                                    None
+                                )
+                                win32file.SetFileTime(handle, win_timestamp, None, None)
+                                handle.close()
+                            except Exception:
+                                pass
+
+                        # Update EXIF metadata with timezone offset (for images and videos)
+                        if self.has_exiftool:
+                            update_exif_timezone(final_path, local_dt, utc_offset, self.has_exiftool)
+
+                        # Record conversion in timezone tracker
+                        gps_coords = parse_gps_coordinates(location)
+                        tz_tracker.record_conversion(
+                            sid=full_sid,
+                            utc_timestamp=utc_date,
+                            gps_coords=gps_coords,
+                            detected_timezone=detected_tz,
+                            local_timestamp=local_str,
+                            utc_offset=utc_offset,
+                            file_path=str(final_path),
+                            file_type=file_type_desc
+                        )
+
+                        # Mark as converted in progress file
+                        if is_composited_file:
+                            media_type_key = 'images' if 'images' in str(folder) else 'videos'
+                            if sid_short in self.progress_tracker.progress.get('composited', {}).get(media_type_key, {}):
+                                self.progress_tracker.progress['composited'][media_type_key][sid_short]['timezone_converted'] = True
+                                self.progress_tracker.progress['composited'][media_type_key][sid_short]['local_date'] = local_str
+                                self.progress_tracker.save_progress()
+                        else:
+                            self.progress_tracker.mark_timezone_converted(full_sid, local_str)
+
+                        converted_files += 1
+
+                        if converted_files % 50 == 0:
+                            print(f"[{datetime.now().strftime('%H:%M:%S')}] Progress: {converted_files} converted, {skipped_files} skipped, {failed_files} failed")
+
+                    except Exception as e:
+                        print(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: Failed to re-convert {file_path.name}: {e}")
+                        failed_files += 1
+
+        # Print summary
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] GPS-Based Re-Conversion Complete!")
+        print(f"{'='*60}")
+        print(f"Total files processed: {total_files}")
+        print(f"Re-converted: {converted_files}")
+        print(f"Skipped (no change needed): {skipped_files}")
+        print(f"Failed: {failed_files}")
+        print(f"{'='*60}")
+
+        # Print timezone statistics
+        stats = tz_tracker.get_stats()
+        if stats['total_conversions'] > 0:
+            print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Timezone Statistics:")
+            print(f"GPS-based conversions: {stats['gps_based_conversions']}")
+            print(f"System timezone fallbacks: {stats['system_based_conversions']}")
+            if stats['timezones']:
+                print(f"\nTimezones detected:")
+                for tz_name, count in sorted(stats['timezones'].items(), key=lambda x: x[1], reverse=True):
+                    print(f"  {tz_name}: {count} files")
+            print(f"\nConversion details saved to: {tz_tracker.tracking_file}")
+            print(f"{'='*60}\n")
