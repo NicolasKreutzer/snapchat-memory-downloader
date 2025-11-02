@@ -794,6 +794,32 @@ class SnapchatDownloader:
         else:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] GPS-based timezone conversion enabled (using {requirements['timezone_lib_name']})")
 
+        # Backfill GPS data from HTML before converting
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Checking for missing GPS data in progress file...")
+        memories = parse_html_file(self.html_file)
+
+        backfilled_sids = set()
+        backfilled_count = 0
+        for memory in memories:
+            sid = memory['sid']
+            if sid in self.progress_tracker.progress.get('downloaded', {}):
+                existing_entry = self.progress_tracker.progress['downloaded'][sid]
+                current_location = existing_entry.get('location')
+                new_location = memory.get('location')
+
+                # Update if location is missing or None
+                if (current_location is None or current_location == '') and new_location:
+                    existing_entry['location'] = new_location
+                    backfilled_sids.add(sid)
+                    backfilled_count += 1
+
+        if backfilled_count > 0:
+            self.progress_tracker.save_progress()
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Backfilled GPS data for {backfilled_count} files")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] These files will be reconverted with GPS-based timezones")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] No GPS data backfill needed")
+
         # Initialize timezone conversion tracker
         tz_tracker = TimezoneConversionTracker()
 
@@ -879,7 +905,8 @@ class SnapchatDownloader:
                         continue
 
                     # Check if already converted (using timezone_conversions.json)
-                    if tz_tracker.is_converted(full_sid):
+                    # BUT reconvert if GPS data was just backfilled (to use GPS-based timezone)
+                    if tz_tracker.is_converted(full_sid) and full_sid not in backfilled_sids:
                         skipped_files += 1
                         continue
 
@@ -1027,6 +1054,33 @@ class SnapchatDownloader:
             return
 
         print(f"[{datetime.now().strftime('%H:%M:%S')}] GPS-based timezone conversion enabled (using {requirements['timezone_lib_name']})")
+
+        # Backfill GPS data from HTML before reconverting
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Checking for missing GPS data in progress file...")
+        memories = parse_html_file(self.html_file)
+
+        backfilled_sids = set()
+        backfilled_count = 0
+        for memory in memories:
+            sid = memory['sid']
+            if sid in self.progress_tracker.progress.get('downloaded', {}):
+                existing_entry = self.progress_tracker.progress['downloaded'][sid]
+                current_location = existing_entry.get('location')
+                new_location = memory.get('location')
+
+                # Update if location is missing or None
+                if (current_location is None or current_location == '') and new_location:
+                    existing_entry['location'] = new_location
+                    backfilled_sids.add(sid)
+                    backfilled_count += 1
+
+        if backfilled_count > 0:
+            self.progress_tracker.save_progress()
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Backfilled GPS data for {backfilled_count} files")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] All files will be reconverted (forced reconversion)")
+        else:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] No GPS data backfill needed")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] All files will be reconverted (forced reconversion)")
 
         # Verify we can actually do this conversion
         can_convert = False

@@ -57,6 +57,26 @@ def parse_gps_coordinates(location_str: Optional[str]) -> Optional[Tuple[float, 
     return None
 
 
+def is_valid_gps_coordinates(coords: Optional[Tuple[float, float]]) -> bool:
+    """Check if GPS coordinates are valid (not None and not both 0).
+
+    Args:
+        coords: Tuple of (latitude, longitude) or None
+
+    Returns:
+        True if coordinates are valid, False otherwise
+    """
+    if coords is None:
+        return False
+
+    lat, lon = coords
+    # Check if both coordinates are 0 (invalid GPS data)
+    if lat == 0.0 and lon == 0.0:
+        return False
+
+    return True
+
+
 def get_timezone_from_gps(lat: float, lon: float) -> Optional[str]:
     """Get timezone name from GPS coordinates.
 
@@ -156,12 +176,13 @@ def utc_to_gps_timezone(utc_date_str: str, location_str: Optional[str]) -> Tuple
 
     Returns:
         Tuple of (datetime object, formatted string, UTC offset, timezone name)
-        Falls back to system local timezone if GPS not available
+        Falls back to system local timezone if GPS not available or invalid
     """
     # Try to get GPS coordinates
     coords = parse_gps_coordinates(location_str)
 
-    if coords and HAS_TIMEZONEFINDER:
+    # Only use GPS-based timezone if coordinates are valid (not None and not both 0)
+    if is_valid_gps_coordinates(coords) and HAS_TIMEZONEFINDER:
         lat, lon = coords
         tz_name = get_timezone_from_gps(lat, lon)
 
@@ -170,7 +191,7 @@ def utc_to_gps_timezone(utc_date_str: str, location_str: Optional[str]) -> Tuple
             local_dt, local_str, utc_offset = utc_to_timezone(utc_date_str, tz_name)
             return local_dt, local_str, utc_offset, tz_name
 
-    # Fallback to system local timezone
+    # Fallback to system local timezone (if GPS is invalid or not available)
     local_dt, local_str = utc_to_local(utc_date_str)
     offset = local_dt.strftime('%z')  # Format: +0200 or -0400
     utc_offset = f"{offset[:3]}:{offset[3:]}" if offset else "+00:00"
