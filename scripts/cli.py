@@ -195,8 +195,6 @@ def main():
                         help='Convert all file timestamps and filenames from UTC to GPS-based timezone')
     parser.add_argument('--reconvert-gps-timezone', action='store_true',
                         help='Re-convert files from old system timezone to GPS-based timezone')
-    parser.add_argument('--download', action='store_true',
-                        help='Download memories (useful to force non-interactive mode)')
     parser.add_argument('--interactive', action='store_true',
                         help='Show interactive menu')
 
@@ -209,8 +207,7 @@ def main():
         args.apply_overlays,
         args.verify_composites,
         args.convert_timezone,
-        args.reconvert_gps_timezone,
-        args.download
+        args.reconvert_gps_timezone
     ])
 
     # Check dependencies before starting
