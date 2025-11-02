@@ -14,14 +14,12 @@ I don't have a Mac so let me know if it works.
 
 
 Recommended you 
-- create a new folder and place this whole repo inside
-  - FOR EACH snapchat EXPORT!!!
-      - IDK what will happen if you replace the html with a newly exported html! it should never delete files but i don't recommend this! until further testing done.)
+- create a new folder **for each export** and place this program inside. 
 - move the folder from snapchat (after extracting zip) into same folder.
 - change that folder (my_data_blah blah folder) name to "data from snapchat".
 
 
-download_snapchat_memories.py (or snapchat-memories-downloader.exe from releases) should be at the same level as the folder you downloaded and renamed.
+download release or follow build instructions below.
 
 
 snapchat gives the original video/image and the overlay as seperate files, this scipt doesn't remove them, just origanizes them.
