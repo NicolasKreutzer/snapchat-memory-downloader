@@ -132,7 +132,7 @@ Once your memories are downloaded:
 python download_snapchat_memories.py --apply-overlays
 ```
 
-**Convert timestamps to your local timezone:**
+**Convert timestamps to GPS-based local timezones:**
 ```bash
 python download_snapchat_memories.py --convert-timezone
 ```
@@ -181,6 +181,14 @@ The script will automatically detect these at startup and prompt you if they're 
   - **macOS**: `brew install ffmpeg`
   - Required to composite Snapchat overlays onto your videos
   - Creates new files in `memories/composited/videos/` folder
+
+**For GPS-based timezone conversion:**
+- **timezonefinder** - Install with: `pip install timezonefinder`
+  - Required to convert timestamps from UTC to GPS-based local timezones
+  - Automatically detects timezone where each photo/video was taken using GPS coordinates
+- **pytz** (Python < 3.9 only) - Install with: `pip install pytz`
+  - Python 3.9+ has built-in zoneinfo support (no need to install)
+  - Not needed if you're using Python 3.9 or higher
 
 > **Note:** You can run the script without these dependencies! If missing, you'll be prompted with:
 > - Option to continue without the optional features
@@ -305,15 +313,52 @@ python download_snapchat_memories.py --verify-composites
 ```
 
 #### Timezone Conversion
-human here:
-still experimental. currently just converts everything in to your current timezone (where you are running the script)
-end human
+
+Convert all file timestamps and filenames from UTC to **GPS-based timezones** where the photo/video was actually taken!
+
+**How it works:**
+1. Reads UTC dates and GPS coordinates from `download_progress.json` for each file
+2. Uses GPS coordinates to detect the timezone where the memory was taken (e.g., "America/New_York", "Europe/Paris")
+3. Converts timestamps to the detected timezone (falls back to system timezone if GPS not available)
+4. Renames files to use local time in filenames
+5. Updates file modification/creation times to local time
+6. Updates EXIF metadata with proper timezone offset (e.g., "-04:00" for EDT) if ExifTool is available
+7. Tracks detailed conversion info in `timezone_conversions.json`
+
+**Requirements:**
 ```bash
-# Convert all file timestamps and filenames from UTC to local timezone
+# Required for GPS-based timezone detection
+pip install timezonefinder
+
+# Python < 3.9 only (Python 3.9+ has built-in zoneinfo)
+pip install pytz
+```
+
+**Usage:**
+```bash
+# Convert all file timestamps and filenames from UTC to GPS-based local timezones
 python download_snapchat_memories.py --convert-timezone
 
 # Safe to run multiple times - automatically skips already converted files
 ```
+
+**Examples:**
+
+Photo taken in New York (GPS: 40.7128° N, 74.0060° W):
+- Before: `2025-10-16_194703_Image_9ce001ca.jpg` (UTC: 7:47 PM)
+- After: `2025-10-16_154703_Image_9ce001ca.jpg` (EDT: 3:47 PM in America/New_York timezone)
+- EXIF metadata: DateTimeOriginal = "2025:10:16 15:47:03", OffsetTimeOriginal = "-04:00"
+
+Photo taken in Paris (GPS: 48.8566° N, 2.3522° E):
+- Before: `2025-10-16_194703_Image_9ce001ca.jpg` (UTC: 7:47 PM)
+- After: `2025-10-16_214703_Image_9ce001ca.jpg` (CEST: 9:47 PM in Europe/Paris timezone)
+- EXIF metadata: DateTimeOriginal = "2025:10:16 21:47:03", OffsetTimeOriginal = "+02:00"
+
+**Statistics:**
+After conversion, the script shows:
+- Number of GPS-based conversions vs system timezone fallbacks
+- List of all timezones detected with file counts
+- Example: "America/New_York: 150 files, Europe/London: 25 files"
 
 #### All Available Options
 
@@ -331,7 +376,7 @@ python download_snapchat_memories.py --convert-timezone
 - `--rebuild-cache` - Force rebuild of overlay pairs cache
 
 **Timezone Conversion Options:**
-- `--convert-timezone` - Convert all file timestamps and filenames from UTC to local timezone
+- `--convert-timezone` - Convert all file timestamps and filenames from UTC to GPS-based local timezones (falls back to system timezone if GPS not available)
 
 ### Handling Rate Limits
 
@@ -494,7 +539,11 @@ For detailed information, see [docs/CLAUDE.md](docs/CLAUDE.md) which includes:
 - Python 3.7 or higher ([python.org](https://www.python.org/))
 - requests library ([PyPI - requests](https://pypi.org/project/requests/))
 - questionary library ([PyPI - questionary](https://pypi.org/project/questionary/))
-- pywin32 library (Windows only, optional) ([PyPI - pywin32](https://pypi.org/project/pywin32/))
+
+**Optional:**
+- pywin32 library (Windows only) ([PyPI - pywin32](https://pypi.org/project/pywin32/))
+- timezonefinder library (for GPS-based timezone conversion) ([PyPI - timezonefinder](https://pypi.org/project/timezonefinder/))
+- pytz library (Python < 3.9 only, for timezone conversion) ([PyPI - pytz](https://pypi.org/project/pytz/))
 
 ## License
 
