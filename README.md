@@ -25,12 +25,11 @@ download release or follow build instructions below.
 snapchat gives the original video/image and the overlay as seperate files, this scipt doesn't remove them, just origanizes them.
 You can re-create the effect with the menu to create new images/vidoes with the snapchat overlay embedded (leaving originals untouched) in a new folder.
 
-
 see below for futher usage.
 
-End human.
+**If this tool has helped you and you feel like contributing please donate to Palestine Children's Relief Fund: https://www.pcrf.net/donate**
 
-claude wants coffee tho: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X21N8LO2)
+End human.
 
 ## Download
 
