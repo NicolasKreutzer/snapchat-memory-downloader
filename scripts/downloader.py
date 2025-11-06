@@ -530,7 +530,7 @@ class SnapchatDownloader:
         print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Compositing {len(pending_pairs)} images...")
 
         if self.has_exiftool:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying enabled (ExifTool detected, adds ~1.5s per image)")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying enabled (ExifTool detected)")
         else:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Metadata copying disabled (ExifTool not found)")
 
