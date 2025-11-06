@@ -27,7 +27,7 @@ You can re-create the effect with the menu to create new images/vidoes with the 
 
 see below for futher usage.
 
-**If this tool has helped you and you feel like contributing please donate to Palestine Children's Relief Fund: https://www.pcrf.net/donate**
+**If this tool has helped you and you feel like contributing please consider donating to Palestine Children's Relief Fund: https://www.pcrf.net/donate**
 
 End human.
 
