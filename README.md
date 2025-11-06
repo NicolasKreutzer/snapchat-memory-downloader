@@ -170,7 +170,7 @@ The script will automatically detect these at startup and prompt you if they're 
   - Without it, modification times will still be set correctly on Windows
 
 **For compositing overlays onto images:**
-- **Pillow** - Install with: `pip install pillow` or `pip install pillow-simd` (5x faster)
+- **Pillow** - Install with: `pip install pillow`
   - Required to composite Snapchat overlays (stickers, text, filters) onto your images
   - Creates new files in `memories/composited/images/` folder
 
