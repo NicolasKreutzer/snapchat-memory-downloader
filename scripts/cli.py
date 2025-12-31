@@ -13,24 +13,23 @@ try:
     import questionary
     from questionary import Style
     MENU_AVAILABLE = True
+    # Custom style for the menu - Pastel Pink & Blue theme
+    # Colors designed to work on both black and white backgrounds
+    custom_style = Style([
+        ('qmark', 'fg:#F48FB1 bold'),          # Question mark - Pastel Pink
+        ('question', 'fg:#90CAF9 bold'),        # Question text - Pastel Blue
+        ('answer', 'fg:#F48FB1 bold'),         # Selected answer - Pastel Pink
+        ('pointer', 'fg:#F48FB1 bold'),        # Pointer symbol - Pastel Pink
+        ('highlighted', 'fg:#90CAF9 bold'),    # Highlighted choice - Pastel Blue
+        ('selected', 'fg:#F48FB1'),            # Selected choice - Pastel Pink
+        ('separator', 'fg:#90CAF9'),           # Separator - Pastel Blue
+        ('instruction', 'fg:#B39DDB'),         # Instruction text - Light Purple
+        ('text', ''),                           # Plain text
+        ('disabled', 'fg:#858585 italic')      # Disabled choices - Gray
+    ])
 except ImportError:
     MENU_AVAILABLE = False
-
-# Custom style for the menu - Pastel Pink & Blue theme
-# Colors designed to work on both black and white backgrounds
-custom_style = Style([
-    ('qmark', 'fg:#F48FB1 bold'),          # Question mark - Pastel Pink
-    ('question', 'fg:#90CAF9 bold'),        # Question text - Pastel Blue
-    ('answer', 'fg:#F48FB1 bold'),         # Selected answer - Pastel Pink
-    ('pointer', 'fg:#F48FB1 bold'),        # Pointer symbol - Pastel Pink
-    ('highlighted', 'fg:#90CAF9 bold'),    # Highlighted choice - Pastel Blue
-    ('selected', 'fg:#F48FB1'),            # Selected choice - Pastel Pink
-    ('separator', 'fg:#90CAF9'),           # Separator - Pastel Blue
-    ('instruction', 'fg:#B39DDB'),         # Instruction text - Light Purple
-    ('text', ''),                           # Plain text
-    ('disabled', 'fg:#858585 italic')      # Disabled choices - Gray
-])
-
+    custom_style = None
 
 def show_interactive_menu():
     """Show interactive menu for selecting operations."""
