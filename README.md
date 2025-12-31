@@ -29,6 +29,8 @@ see below for futher usage.
 
 **If this tool has helped you and you feel like contributing please consider donating to Palestine Children's Relief Fund: https://www.pcrf.net/donate**
 
+contributing: If you submit a pr you MUST disclose if ai was used in your code generation!!!.
+
 End human.
 
 ## Download
